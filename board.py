@@ -4,7 +4,6 @@ Contains code to describe the current state of the game.
 
 from enum import Enum
 
-
 class Position:
     def __init__(self, row: int, column: int):
         """
