@@ -25,7 +25,7 @@ FONT_MAIN = pygame.font.Font(PATH_FONTS / 'silkscreen.ttf', 64)
 FONT_UI = pygame.font.Font(PATH_FONTS / 'silkscreen.ttf', 32)
 
 # Sprites
-SPRT_MARBLE = pygame.image.load(PATH_SPRITES / "marble_2.png")
+SPRT_MARBLE = pygame.image.load(PATH_SPRITES / "marble.png")
 SPRT_BOARD = pygame.image.load(PATH_SPRITES / "board.png")
 SPRT_BOARD = pygame.transform.scale(SPRT_BOARD, (650, 650))
 SPRT_POSSIBLE_MOVE = pygame.image.load(PATH_SPRITES / "possible_ring.png")
