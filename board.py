@@ -20,7 +20,7 @@ class NodeState(Enum):
 
 class Board:
     """
-    Defines the current board state,next possible moves,can also execute a move
+    Defines the current board state, next possible moves, can also execute a move
     """
 
     def __init__(self):
@@ -29,6 +29,27 @@ class Board:
         self._board = [
             [NodeState.INVALID for _ in range(self.SIZE)] for _ in range(self.SIZE)
         ]
+        self.num_marbles = 32
+        # setup up valid square grids
+        # top sub grid
+        for row in range(2):
+            for column in range(self.SIZE):
+                if column > 1 and column < 5:
+                    self._board[row][column] = NodeState.FILLED
+
+        # middle sub grids
+        for row in range(2, 5):
+            for column in range(self.SIZE):
+                self._board[row][column] = NodeState.FILLED
+
+        # leave the middle empty
+        self._board[3][3] = NodeState.EMPTY
+
+        # top sub grid
+        for row in range(5, self.SIZE):
+            for column in range(self.SIZE):
+                if column > 1 and column < 5:
+                    self._board[row][column] = NodeState.FILLED
 
     def __str__(self):
         # @todo make the column spacing same as row spacing
