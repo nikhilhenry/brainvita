@@ -38,6 +38,8 @@ SPRT_POSSIBLE_MOVE = pygame.transform.scale(SPRT_POSSIBLE_MOVE, (18 * SCALE_FACT
 SPRT_SELECTED_MARBLE = pygame.image.load(PATH_SPRITES / "select_ring.png")
 SPRT_SELECTED_MARBLE = pygame.transform.scale(SPRT_SELECTED_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR))  # scaling factor 3
 
+#"this is some new code hello wasm"
+
 # Sounds
 SND_BG = pygame.mixer.Sound(str(PATH_AUDIO / "soundtrack.ogg"))
 SND_MOVE = pygame.mixer.Sound(str(PATH_AUDIO / "marble1.ogg"))
