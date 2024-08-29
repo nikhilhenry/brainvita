@@ -169,7 +169,7 @@ class Board:
         for i in range(-2, 3, 2):
             if i == 0:
                 continue
-            
+
             if self[pos + Position(i, 0)] == NodeState.EMPTY:
                 positions.append(pos + Position(i, 0))
             if self[pos + Position(0, i)] == NodeState.EMPTY:

@@ -99,10 +99,20 @@ class Brainvita:
 
                 # get which possible move is clicked (if any)
                 for move in self.possible_positions:
-                    if POS2COORD[move].x < event.pos[0] < POS2COORD[move].x + 18 * c.SCALE_FACTOR:
-                        if POS2COORD[move].y < event.pos[1] < POS2COORD[move].y + 18 * c.SCALE_FACTOR:
+                    if (
+                        POS2COORD[move].x
+                        < event.pos[0]
+                        < POS2COORD[move].x + 18 * c.SCALE_FACTOR
+                    ):
+                        if (
+                            POS2COORD[move].y
+                            < event.pos[1]
+                            < POS2COORD[move].y + 18 * c.SCALE_FACTOR
+                        ):
                             # move the marble
-                            new_board = self.board.make_move(Move(self.selected_marble.pos, move))
+                            new_board = self.board.make_move(
+                                Move(self.selected_marble.pos, move)
+                            )
                             if new_board:
                                 self.musician.play_move_sound()
                                 self.board = new_board
@@ -110,14 +120,14 @@ class Brainvita:
                                 self.update_marbles_based_on_board()
                                 self.selected_marble = None
                                 self.possible_positions = []
-    
+
     def update_marbles_based_on_board(self):
         """
         Update the marbles based on the board state
         """
         for marble in self.marble_list:
             marble.update(marble.pos, self.board[marble.pos])
-    
+
     def main_loop(self):
         """
         Main game loop for Brainvita. Run this in the main loop.

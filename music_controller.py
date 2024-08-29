@@ -1,8 +1,8 @@
-
 from pygame import mixer
 import constants as c
 
-class MusicController():
+
+class MusicController:
     def __init__(self):
         mixer.init()
         self.bg_channel = mixer.Channel(0)
@@ -17,6 +17,6 @@ class MusicController():
 
     def play_move_sound(self):
         self.fx_channel.play(c.SND_MOVE)
-    
+
     def play_select_sound(self):
         self.fx_channel.play(c.SND_SELECT)
