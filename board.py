@@ -4,6 +4,7 @@ Contains code to describe the current state of the game.
 
 from enum import Enum
 from collections import defaultdict
+from typing import Dict
 
 
 class Position:
@@ -83,7 +84,7 @@ class Board:
 
         # state
         self.num_marbles = 32
-        self._board = defaultdict(lambda: NodeState.INVALID)
+        self._board: Dict[Position, NodeState] = defaultdict(lambda: NodeState.INVALID)
 
         # top sub grid
         for row in range(2):
@@ -123,6 +124,29 @@ class Board:
 
     def __lte__(self, other):
         return self.num_marbles <= other.num_marbles
+
+    def solvable(self):
+        """
+        Returns True if current arrangment of marbles allows for some marbles to be eliminated, else False.
+        """
+        if self.num_marbles > 4:
+            # some moves can still be made in this state
+            return True
+        marble_positions = [
+            pos for pos, state in self._board.items() if state == NodeState.FILLED
+        ]
+        # compute the distance between this marble and every other marble
+        for marble in marble_positions:
+            for other in marble_positions:
+                if other == marble:
+                    continue
+                distance = marble - other
+                # if either difference in column or row is odd we can eliminate a marble
+                if distance.row == 0 and distance.column % 2 == 1:
+                    return True
+                if distance.column == 0 and distance.row % 2 == 1:
+                    return True
+        return False
 
     def make_move(self, move: Move):
         """
@@ -213,6 +237,7 @@ if __name__ == "__main__":
         if board == None:
             print("invalid move please play better")
             break
+        print(board.solvable())
         src_x = int(input("Enter src row: "))
         src_y = int(input("Enter src column: "))
         dst_x = int(input("Enter dst row: "))
