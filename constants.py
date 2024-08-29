@@ -49,3 +49,5 @@ SPRT_SELECTED_MARBLE = pygame.transform.scale(
 # SND_MOVE = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "move.wav")
 # SND_SELECT = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "select.wav")
 SND_BG = pygame.mixer.Sound(str(PATH_AUDIO / "soundtrack.ogg"))
+SND_MOVE = pygame.mixer.Sound(str(PATH_AUDIO / "marble1.ogg"))
+SND_SELECT = pygame.mixer.Sound(str(PATH_AUDIO / "select.ogg"))

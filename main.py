@@ -60,7 +60,7 @@ class Brainvita:
     Game instance. To reset the game, create a new instance.
     """
 
-    def __init__(self):
+    def __init__(self, musician: MusicController) -> None:
 
         # Game state
         self.board = Board()
@@ -68,6 +68,10 @@ class Brainvita:
         self.is_game_over = False
         self.selected_marble = None
         self.possible_positions = []
+
+        # musician
+        self.musician = musician
+        self.musician.start()
 
         # Create sprite lists
         self.marble_list = pygame.sprite.Group()
@@ -91,6 +95,7 @@ class Brainvita:
                     if marble.rect.collidepoint(event.pos):
                         # mark marble as selected, prompting move generation
                         self.selected_marble = marble
+                        self.musician.play_select_sound()
 
                 # get which possible move is clicked (if any)
                 for move in self.possible_positions:
@@ -99,6 +104,7 @@ class Brainvita:
                             # move the marble
                             new_board = self.board.make_move(Move(self.selected_marble.pos, move))
                             if new_board:
+                                self.musician.play_move_sound()
                                 self.board = new_board
                                 self.move_count += 1
                                 self.update_marbles_based_on_board()
@@ -169,9 +175,8 @@ class Brainvita:
 def main():
     """Main program function."""
 
-    game = Brainvita()
     musician = MusicController()
-    musician.start()
+    game = Brainvita(musician=musician)
     # Main game loop
     while not game.is_game_over:
 
