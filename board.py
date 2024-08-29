@@ -92,7 +92,7 @@ class Board:
     def __setitem__(self, pos: Position, value: NodeState):
         self._board[pos] = value
 
-    def __lte__(self, other):
+    def __le__(self, other):
         return self.num_marbles <= other.num_marbles
 
     def solvable(self):
