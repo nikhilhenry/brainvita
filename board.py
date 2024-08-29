@@ -3,6 +3,7 @@ Contains code to describe the current state of the game.
 """
 
 from enum import Enum
+from collections import defaultdict
 
 
 class Position:
@@ -23,7 +24,16 @@ class Position:
         col = self.column - other.column
         return Position(row, col)
 
+    def __hash__(self):
+        return hash((self.row, self.column))
+
+    def __eq__(self, other):
+        return self.row == other.row and self.column == other.column
+
     def __str__(self):
+        return f"({self.row},{self.column})"
+
+    def __repr__(self):
         return f"({self.row},{self.column})"
 
 
@@ -36,7 +46,7 @@ class Move:
         self.src = src
         self.dst = dest
 
-    def get_in_between_pos(self):
+    def get_in_between_pos(self) -> Position:
         """
         Returns the position between the src and destionation
         """
@@ -58,6 +68,9 @@ class NodeState(Enum):
     def __str__(self):
         return self.value
 
+    def __repr__(self):
+        return self.value
+
 
 class Board:
     """
@@ -65,48 +78,52 @@ class Board:
     """
 
     def __init__(self):
-        # board is a 7x7 matrix of states
-        self.SIZE = 7
-        self._board = [
-            [NodeState.INVALID for _ in range(self.SIZE)] for _ in range(self.SIZE)
-        ]
+
+        self._SIZE = 7
+
+        # state
         self.num_marbles = 32
-        # setup up valid square grids
+        self._board = defaultdict(lambda: NodeState.INVALID)
+
         # top sub grid
         for row in range(2):
-            for column in range(self.SIZE):
+            for column in range(self._SIZE):
                 if column > 1 and column < 5:
-                    self._board[row][column] = NodeState.FILLED
+                    self._board[Position(row, column)] = NodeState.FILLED
 
         # middle sub grids
         for row in range(2, 5):
-            for column in range(self.SIZE):
-                self._board[row][column] = NodeState.FILLED
+            for column in range(self._SIZE):
+                self._board[Position(row, column)] = NodeState.FILLED
 
         # leave the middle empty
-        self._board[3][3] = NodeState.EMPTY
+        self._board[Position(3, 3)] = NodeState.EMPTY
 
         # top sub grid
-        for row in range(5, self.SIZE):
-            for column in range(self.SIZE):
+        for row in range(5, self._SIZE):
+            for column in range(self._SIZE):
                 if column > 1 and column < 5:
-                    self._board[row][column] = NodeState.FILLED
+                    self._board[Position(row, column)] = NodeState.FILLED
 
     def __str__(self):
-        # @todo make the column spacing same as row spacing
-        return (
-            "\n\n".join(["  ".join([str(cell) for cell in row]) for row in self._board])
-            + f"\nMarbles: {self.num_marbles}"
-        )
+        s = ""
+        for row in range(self._SIZE):
+            for column in range(self._SIZE):
+                s += self._board[Position(row, column)].value + " "
+
+            s += "\n"
+
+        return s
 
     def __getitem__(self, pos: Position):
-        row, col = pos.row, pos.column
-        return self._board[row][col]
+        return self._board[pos]
 
     def __setitem__(self, pos: Position, value: NodeState):
-        row, col = pos.row, pos.column
-        self._board[row][col] = value
+        self._board[pos] = value
 
+    def __lte__(self, other):
+        return self.num_marbles <= other.num_marbles
+    
     def make_move(self, move: Move):
         """
         Returns a new game state based on the move.
@@ -147,11 +164,47 @@ class Board:
 
         return new_board
 
+    def get_possible_move_locations(self, pos: Position) -> list[Position]:
+        """
+        Returns a list of possible move-to positions from the given position
+        """
+        positions = []
+        for i in range(-2, 3, 2):
+            if i == 0:
+                continue
+
+            if self[pos + Position(i, 0)] == NodeState.EMPTY:
+                positions.append(pos + Position(i, 0))
+            if self[pos + Position(0, i)] == NodeState.EMPTY:
+                positions.append(pos + Position(0, i))
+
+        return positions
+
+    def move_gen(self):
+        """
+        Generates all possible moves from the current state
+        """
+
+        boards = []
+        for row in range(self._SIZE):
+            for column in range(self._SIZE):
+                if self[Position(row, column)] == NodeState.FILLED:
+                    current = Position(row, column)
+                    possible_dests = self.get_possible_move_locations(current)
+                    for dest in possible_dests:
+                        boards.append(self.make_move(Move(current, dest)))
+
+        return boards
+
+    def goal_test(self):
+        """
+        Returns True if the game is over
+        """
+        return self.num_marbles == 1
 
 """
 Driver Testing Code
 """
-
 if __name__ == "__main__":
     board = Board()
     print(board)
@@ -165,4 +218,3 @@ if __name__ == "__main__":
         dst_y = int(input("Enter dst column: "))
         move = Move(Position(src_x, src_y), Position(dst_x, dst_y))
         board = board.make_move(move)
-        print(board)
