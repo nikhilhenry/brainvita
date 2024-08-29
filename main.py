@@ -170,7 +170,6 @@ async def main():
     musician = MusicController()
     game = Brainvita(musician=musician)
     if sys.platform == "emscripten":
-        print("set pixelated")
         platform.window.canvas.style.imageRendering = "pixelated"
     # Main game loop
     while not game.is_game_over:
@@ -189,7 +188,4 @@ async def main():
 
 
 # Call the main function, start up the game
-if __name__ == "__main__":
-    _ = main()
-
 asyncio.run(main())
