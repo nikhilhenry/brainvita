@@ -1,8 +1,6 @@
 from pathlib import Path
 import pygame
 
-pygame.mixer.pre_init(44100, -16, 2, 512)
-pygame.mixer.init()
 pygame.init()
 
 # Paths
@@ -47,6 +45,6 @@ SPRT_SELECTED_MARBLE = pygame.transform.scale(
 )  # scaling factor 3
 
 # Sounds
-SND_BG = pygame.mixer.Sound(str(PATH_AUDIO / "soundtrack.ogg"))
-SND_MOVE = pygame.mixer.Sound(str(PATH_AUDIO / "marble1.ogg"))
-SND_SELECT = pygame.mixer.Sound(str(PATH_AUDIO / "cut_select.ogg"))
+# SND_MARBLE_JUMP = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "marble_jump.ogg")
+# SND_MOVE = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "move.ogg")
+# SND_SELECT = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "select.ogg")

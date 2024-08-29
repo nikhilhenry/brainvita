@@ -5,3 +5,6 @@
 .DS_Store
 
 __pycache__/
+*-pygbag.???
+/build
+/dist

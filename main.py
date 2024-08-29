@@ -1,10 +1,12 @@
+import asyncio
 from typing import Any
 import pygame
 import constants as c
 from board import Board, Move, NodeState, Position
 from collections import namedtuple
-
 from music_controller import MusicController
+import sys, platform
+
 
 Coordinate = namedtuple("Coordinate", ["x", "y"])
 
@@ -182,11 +184,13 @@ class Brainvita:
         pygame.display.flip()
 
 
-def main():
+async def main():
     """Main program function."""
 
     musician = MusicController()
     game = Brainvita(musician=musician)
+    if sys.platform == "emscripten":
+        platform.window.canvas.style.imageRendering = "pixelated"
     # Main game loop
     while not game.is_game_over:
 
@@ -197,11 +201,11 @@ def main():
         # Draw the current frame
         game.display()
         c.GAME_CLOCK.tick(c.TICK_RATE)
+        await asyncio.sleep(0)
 
     # Close window and exit
     pygame.quit()
 
 
 # Call the main function, start up the game
-if __name__ == "__main__":
-    main()
+asyncio.run(main())
