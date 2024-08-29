@@ -16,12 +16,8 @@ for i in range(7):
     for j in range(7):
         # 198x198 board, 18x18 marbles, 36x36 is the padding before grid starts, no padding in between marbles
         POS2COORD[Position(i, j)] = Coordinate(
-            ((c.D_WIDTH // 2) - (198 * c.SCALE_FACTOR // 2))
-            + (36 * c.SCALE_FACTOR)
-            + (j * 18 * c.SCALE_FACTOR),
-            ((c.D_HEIGHT // 2) - (198 * c.SCALE_FACTOR // 2))
-            + (36 * c.SCALE_FACTOR)
-            + (i * 18 * c.SCALE_FACTOR),
+            ((c.D_WIDTH // 2) - (198 * c.SCALE_FACTOR // 2)) + (36 * c.SCALE_FACTOR) + (j * 18 * c.SCALE_FACTOR),
+            ((c.D_HEIGHT // 2) - (198 * c.SCALE_FACTOR // 2)) + (36 * c.SCALE_FACTOR) + (i * 18 * c.SCALE_FACTOR),
         )
 
 # initialize pygame
@@ -62,7 +58,7 @@ class Brainvita:
     Game instance. To reset the game, create a new instance.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, musician: MusicController) -> None:
 
         # Game state
         self.board = Board()
@@ -72,6 +68,8 @@ class Brainvita:
         self.possible_positions = []
 
         # musician
+        self.musician = musician
+        self.musician.start()
 
         # Create sprite lists
         self.marble_list = pygame.sprite.Group()
@@ -95,24 +93,16 @@ class Brainvita:
                     if marble.rect.collidepoint(event.pos):
                         # mark marble as selected, prompting move generation
                         self.selected_marble = marble
+                        self.musician.play_select_sound()
 
                 # get which possible move is clicked (if any)
                 for move in self.possible_positions:
-                    if (
-                        POS2COORD[move].x
-                        < event.pos[0]
-                        < POS2COORD[move].x + 18 * c.SCALE_FACTOR
-                    ):
-                        if (
-                            POS2COORD[move].y
-                            < event.pos[1]
-                            < POS2COORD[move].y + 18 * c.SCALE_FACTOR
-                        ):
+                    if POS2COORD[move].x < event.pos[0] < POS2COORD[move].x + 18 * c.SCALE_FACTOR:
+                        if POS2COORD[move].y < event.pos[1] < POS2COORD[move].y + 18 * c.SCALE_FACTOR:
                             # move the marble
-                            new_board = self.board.make_move(
-                                Move(self.selected_marble.pos, move)
-                            )
+                            new_board = self.board.make_move(Move(self.selected_marble.pos, move))
                             if new_board:
+                                self.musician.play_move_sound()
                                 self.board = new_board
                                 self.move_count += 1
                                 self.update_marbles_based_on_board()
@@ -132,9 +122,7 @@ class Brainvita:
         """
 
         if self.selected_marble:
-            move_locations = self.board.get_possible_move_locations(
-                self.selected_marble.pos
-            )
+            move_locations = self.board.get_possible_move_locations(self.selected_marble.pos)
             self.possible_positions = move_locations
 
     def display(self):
@@ -155,13 +143,9 @@ class Brainvita:
 
         rendered_text = c.FONT_MAIN.render("Brainvita", False, (0, 0, 0))
         c.ROOT_DISPLAY.blit(rendered_text, (20, 50))
-        rendered_text = c.FONT_UI.render(
-            f"Moves:        {self.move_count}", False, (0, 0, 0)
-        )
+        rendered_text = c.FONT_UI.render(f"Moves:        {self.move_count}", False, (0, 0, 0))
         c.ROOT_DISPLAY.blit(rendered_text, (20, 120))
-        rendered_text = c.FONT_UI.render(
-            f"Marbles:    {self.board.num_marbles}", False, (0, 0, 0)
-        )
+        rendered_text = c.FONT_UI.render(f"Marbles:    {self.board.num_marbles}", False, (0, 0, 0))
         c.ROOT_DISPLAY.blit(rendered_text, (20, 150))
 
         self.marble_list.draw(c.ROOT_DISPLAY)
@@ -183,8 +167,8 @@ class Brainvita:
 async def main():
     """Main program function."""
 
-    game = Brainvita()
-    print("starting game")
+    musician = MusicController()
+    game = Brainvita(musician=musician)
     if sys.platform == "emscripten":
         print("set pixelated")
         platform.window.canvas.style.imageRendering = "pixelated"
