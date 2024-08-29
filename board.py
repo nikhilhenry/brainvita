@@ -78,37 +78,37 @@ class Board:
     """
 
     def __init__(self):
-        # board is a 7x7 matrix of states
-        self.SIZE = 7
-        self.num_marbles = 32
-        # setup up valid square grids
 
+        self._SIZE = 7
+
+        # state
+        self.num_marbles = 32
         self._board = defaultdict(lambda: NodeState.INVALID)
 
         # top sub grid
         for row in range(2):
-            for column in range(self.SIZE):
+            for column in range(self._SIZE):
                 if column > 1 and column < 5:
                     self._board[Position(row, column)] = NodeState.FILLED
 
         # middle sub grids
         for row in range(2, 5):
-            for column in range(self.SIZE):
+            for column in range(self._SIZE):
                 self._board[Position(row, column)] = NodeState.FILLED
 
         # leave the middle empty
         self._board[Position(3, 3)] = NodeState.EMPTY
 
         # top sub grid
-        for row in range(5, self.SIZE):
-            for column in range(self.SIZE):
+        for row in range(5, self._SIZE):
+            for column in range(self._SIZE):
                 if column > 1 and column < 5:
                     self._board[Position(row, column)] = NodeState.FILLED
 
     def __str__(self):
         s = ""
-        for row in range(self.SIZE):
-            for column in range(self.SIZE):
+        for row in range(self._SIZE):
+            for column in range(self._SIZE):
                 s += self._board[Position(row, column)].value + " "
 
             s += "\n"
@@ -121,6 +121,9 @@ class Board:
     def __setitem__(self, pos: Position, value: NodeState):
         self._board[pos] = value
 
+    def __lte__(self, other):
+        return self.num_marbles <= other.num_marbles
+    
     def make_move(self, move: Move):
         """
         Returns a new game state based on the move.
@@ -177,11 +180,31 @@ class Board:
 
         return positions
 
+    def move_gen(self):
+        """
+        Generates all possible moves from the current state
+        """
+
+        boards = []
+        for row in range(self._SIZE):
+            for column in range(self._SIZE):
+                if self[Position(row, column)] == NodeState.FILLED:
+                    current = Position(row, column)
+                    possible_dests = self.get_possible_move_locations(current)
+                    for dest in possible_dests:
+                        boards.append(self.make_move(Move(current, dest)))
+
+        return boards
+
+    def goal_test(self):
+        """
+        Returns True if the game is over
+        """
+        return self.num_marbles == 1
 
 """
 Driver Testing Code
 """
-
 if __name__ == "__main__":
     board = Board()
     print(board)
