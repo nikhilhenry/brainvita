@@ -206,17 +206,25 @@ class Board:
 
     def move_gen(self):
         """
-        Generates all possible moves from the current state
+        Generates all possible moves from the current state, eliminating states which do not reach termination
         """
 
-        boards = []
+        boards = []  # keep track of all possible neigbouring states
         for row in range(self._SIZE):
             for column in range(self._SIZE):
                 if self[Position(row, column)] == NodeState.FILLED:
                     current = Position(row, column)
-                    possible_dests = self.get_possible_move_locations(current)
+                    possible_dests = self.get_possible_move_locations(
+                        current
+                    )  # get all possible moves for that marble
                     for dest in possible_dests:
-                        boards.append(self.make_move(Move(current, dest)))
+                        # compute the next states, can return a maximum of 4 valid states
+                        new_board = self.make_move(Move(current, dest))
+                        # eliminating the states which do not respect the domain constraints
+                        if (
+                            new_board != None and new_board.solvable()
+                        ):  # check that we can progress from this state
+                            boards.append(new_board)
 
         return boards
 
