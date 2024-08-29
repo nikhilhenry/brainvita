@@ -179,7 +179,7 @@ class Board:
         Generates all possible moves from the current state, eliminating states which do not reach termination
         """
 
-        boards = []  # keep track of all possible neigbouring states
+        boards: list[Board] = []  # keep track of all possible neigbouring states
         for row in range(self._SIZE):
             for column in range(self._SIZE):
                 if self[Position(row, column)] == NodeState.FILLED:
