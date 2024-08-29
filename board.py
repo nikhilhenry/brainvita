@@ -123,7 +123,7 @@ class Board:
 
     def __lte__(self, other):
         return self.num_marbles <= other.num_marbles
-    
+
     def make_move(self, move: Move):
         """
         Returns a new game state based on the move.
@@ -201,6 +201,7 @@ class Board:
         Returns True if the game is over
         """
         return self.num_marbles == 1
+
 
 """
 Driver Testing Code

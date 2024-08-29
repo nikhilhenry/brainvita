@@ -37,6 +37,6 @@ SPRT_SELECTED_MARBLE = pygame.image.load(PATH_SPRITES / "select_ring.png")
 SPRT_SELECTED_MARBLE = pygame.transform.scale(SPRT_SELECTED_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR))  # scaling factor 3
 
 # Sounds
-# SND_MARBLE_JUMP = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "marble_jump.wav")
-# SND_MOVE = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "move.wav")
-# SND_SELECT = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "select.wav")
+# SND_MARBLE_JUMP = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "marble_jump.ogg")
+# SND_MOVE = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "move.ogg")
+# SND_SELECT = pygame.mixer.Sound(PATH_ROOT / "assets" / "sounds" / "select.ogg")
