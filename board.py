@@ -1,6 +1,7 @@
 """
 Contains code to describe the current state of the game.
 """
+
 from __future__ import annotations
 
 from enum import Enum
@@ -12,6 +13,9 @@ from utils import Position
 from search import Node
 import copy
 import time
+
+import argparse
+
 
 class Move:
     """
@@ -98,10 +102,8 @@ class Board:
                 )
                 if new_board._board[Position(row, column)] == NodeState.FILLED:
                     new_board.num_marbles += 1
-        
+
         return new_board
-        
-        
 
     def __hash__(self) -> int:
         # to allow for hashing of the board state, we use the string representation
@@ -267,29 +269,68 @@ class Board:
 
 
 """
-Driver Testing Code
+CLI interface for the game
 """
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Brainvita game (CLI)")
+    parser.add_argument(
+        "--start-file",
+        type=str,
+        default=None,
+        help="File containing the starting board state. If not provided, the default starting state is used.",
+    )
+    parser.add_argument(
+        "--solver",
+        type=str,
+        default="best",
+        choices=["bfs", "dfs", "best", "manual"],
+        help="Solver to use. Options: bfs, dfs, best, manual. Default: best",
+    )
+    parser.add_argument(
+        "--savefile",
+        type=str,
+        default="sequence.pkl",
+        help="Filename to save the sequence of moves. Default: sequence.pkl",
+    )
+    args = parser.parse_args()
 
-    board = Board()
+    if args.start_file:
+        with open(args.start_file, "r") as f:
+            board = Board.construct_from_string(f.read())
+    else:
+        board = Board()
+
+    print("STARTING STATE")
     print(board)
+
     start_node = Node(board)
     st = time.time()
-    sequence = bread_first_search(start_node)
-    for board in sequence[::-1]:
-        print(board)
-    print(f"Time taken: {time.time() - st}s | Steps taken: {len(sequence)}")
+    if args.solver == "bfs":
+        print("Using Breadth First Search")
+        sequence = bread_first_search(start_node)
+    elif args.solver == "dfs":
+        print("Using Depth First Search")
+        sequence = dhokla_first_search(start_node)
+    elif args.solver == "best":
+        print("Using Best First Search")
+        sequence = best_first_search(start_node)
+    else:
+        old_board = None
+        while True:
+            if board is None:
+                print("Invalid Move!")
+                board = old_board
 
-    pickle.dump([str(board) for board in sequence], open("sequence.pkl", "wb"))
+            print(board)
+            src_x = int(input("Enter src row: "))
+            src_y = int(input("Enter src column: "))
+            dst_x = int(input("Enter dst row: "))
+            dst_y = int(input("Enter dst column: "))
+            move = Move(Position(src_x, src_y), Position(dst_x, dst_y))
+            old_board = board
+            board = board.make_move(move)
 
-    while False:
-        if board == None:
-            print("invalid move please play better")
-            break
-        print(board.solvable())
-        src_x = int(input("Enter src row: "))
-        src_y = int(input("Enter src column: "))
-        dst_x = int(input("Enter dst row: "))
-        dst_y = int(input("Enter dst column: "))
-        move = Move(Position(src_x, src_y), Position(dst_x, dst_y))
-        board = board.make_move(move)
+    print(f"Time taken: {round(time.time() - st,3)}s | Steps taken to solve: {len(sequence)}")
+    pickle.dump([str(board) for board in sequence], open(args.savefile, "wb"))
+
+    print(f"(Reverse) Sequence of moves saved to {args.savefile}")

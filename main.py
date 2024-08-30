@@ -1,12 +1,14 @@
 import asyncio
-from typing import Any
+from typing import Any, TextIO
 import pygame
 import constants as c
-from board import Board, Move, NodeState, Position
+from board import Board, Move, NodeState
 from collections import namedtuple
 from music_controller import MusicController
-import sys, platform
-
+import sys
+import platform
+from utils import Position
+import argparse
 
 Coordinate = namedtuple("Coordinate", ["x", "y"])
 
@@ -62,10 +64,15 @@ class Brainvita:
     Game instance. To reset the game, create a new instance.
     """
 
-    def __init__(self, musician: MusicController) -> None:
+    def __init__(
+        self, musician: MusicController, starting_state: str | None = None
+    ) -> None:
 
         # Game state
-        self.board = Board()
+        if starting_state is not None:
+            self.board = Board.construct_from_string(starting_state)
+        else:
+            self.board = Board()
 
         self.move_count = 0
         self.is_game_over = False
@@ -133,7 +140,7 @@ class Brainvita:
 
     def main_loop(self):
         """
-        Main game loop for Brainvita. Run this in the main loop.
+        Main game loop for Brainvita.
         """
 
         if self.selected_marble:
@@ -185,13 +192,15 @@ class Brainvita:
         pygame.display.flip()
 
 
-async def main():
+async def main(starting_state: str | None = None):
     """Main program function."""
 
     musician = MusicController()
-    game = Brainvita(musician=musician)
-    if sys.platform == "emscripten":
+    game = Brainvita(musician=musician, starting_state=starting_state)
+
+    if sys.platform == "emscripten":  # for web
         platform.window.canvas.style.imageRendering = "pixelated"
+    
     # Main game loop
     while not game.is_game_over:
 
@@ -207,6 +216,24 @@ async def main():
     # Close window and exit
     pygame.quit()
 
+if sys.platform != "emscripten":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="Brainvita game (UI)")
+    parser.add_argument(
+        "--start-file",
+        type=str,
+        default=None,
+        help="File containing the starting board state. If not provided, the default starting state is used.",
+    )
+    args = parser.parse_args()
 
-# Call the main function, start up the game
-asyncio.run(main())
+    # asyncio is used to run the main function, for wasm compatibility
+    if args.start_file:
+        with open(args.start_file, "r") as f:
+            asyncio.run(main(f.read()))
+    else:
+        asyncio.run(main())
+
+else:
+    # Wasm: No command line arguments
+    asyncio.run(main())
