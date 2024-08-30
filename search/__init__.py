@@ -1,2 +1,3 @@
-from search.node import Node
-from search.bfs import bread_first_search
+from .bfs import *
+from .dfs import *
+from .bestfs import *

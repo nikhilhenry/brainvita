@@ -5,10 +5,11 @@ Contains code to describe the current state of the game.
 from enum import Enum
 from collections import defaultdict
 from typing import Dict
+from search import dhokla_first_search, best_first_search, bread_first_search
 from utils import Position
 from search import Node
-from search import bread_first_search
 from copy import deepcopy
+import time
 
 
 class Move:
@@ -90,9 +91,11 @@ class Board:
                 s += self._board[Position(row, column)].value + " "
 
             s += "\n"
-
         s += f"\nmarbles:{self.num_marbles}\n"
         return s
+    
+    def __repr__(self):
+        return self.__str__()
 
     def __getitem__(self, pos: Position):
         return self._board[pos]
@@ -103,10 +106,17 @@ class Board:
     def __le__(self, other):
         return self.num_marbles <= other.num_marbles
 
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+
     def solvable(self):
         """
         Returns True if current arrangment of marbles allows for some marbles to be eliminated, else False.
         """
+        if self.num_marbles == 1:
+            return True
+        
         if self.num_marbles > 4:
             # some moves can still be made in this state
             return True
@@ -208,7 +218,7 @@ class Board:
                             continue
                         # eliminating the states which do not respect the domain constraints
                         if (
-                            new_board != None 
+                            new_board != None and new_board.solvable()
                         ):  # check that we can progress from this state
                             #if new_board.num_marbles == 32:
                                 #print("pre violation")
@@ -235,8 +245,11 @@ if __name__ == "__main__":
     board = Board()
     print(board)
     start_node = Node(board)
-    sequence = bread_first_search(start_node)
-    print(sequence)
+    st = time.time()
+    sequence = best_first_search(start_node)
+    for board in sequence[::-1]:
+        print(board)
+    print(f"Time taken: {time.time() - st}s | Steps taken: {len(sequence)}")
 
     while False:
         if board == None:
