@@ -315,6 +315,7 @@ if __name__ == "__main__":
         print("Using Best First Search")
         sequence = best_first_search(start_node)
     else:
+        sequence = [board]
         old_board = None
         while True:
             print(board)
@@ -329,9 +330,12 @@ if __name__ == "__main__":
                 print("Invalid Move!")
                 board = old_board
             else:
+                sequence.append(board)
                 if board.goal_test():
                     print("Game Over!")
                     break
+
+        sequence = sequence[::-1] # store in reverse order
 
     print(
         f"Time taken: {round(time.time() - st,3)}s | Steps taken to solve: {len(sequence)}"
