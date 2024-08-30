@@ -11,3 +11,5 @@ __pycache__/
 
 *.pkl
 start_file.txt
+
+temp_*.png

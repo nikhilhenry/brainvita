@@ -15,7 +15,6 @@ PATH_AUDIO = PATH_ROOT / "assets" / "audio"
 D_WIDTH = 1380
 D_HEIGHT = 768
 ROOT_DISPLAY = pygame.display.set_mode((D_WIDTH, D_HEIGHT))
-pygame.display.set_caption('Brainvita')
 
 
 # Main Clock
@@ -47,11 +46,17 @@ SPRT_SELECTED_MARBLE = pygame.image.load(PATH_SPRITES / "select_ring.png")
 SPRT_SELECTED_MARBLE = pygame.transform.scale(
     SPRT_SELECTED_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
 )  # scaling factor 3
-pygame.display.set_icon(SPRT_MARBLE)
 
-# "this is some new code hello wasm"
+# Buttons
+SPRT_BTN = pygame.image.load(PATH_SPRITES / "temp_buttonNormal.png")
+SPRT_BTN_HOVERED = pygame.image.load(PATH_SPRITES / "temp_buttonHover.png")
+SPRT_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "temp_buttonPressed.png")
 
 # Sounds
 SND_BG = pygame.mixer.Sound(str(PATH_AUDIO / "soundtrack.ogg"))
 SND_MOVE = pygame.mixer.Sound(str(PATH_AUDIO / "marble1.ogg"))
 SND_SELECT = pygame.mixer.Sound(str(PATH_AUDIO / "cut_select.ogg"))
+
+# Set Display Properties
+pygame.display.set_caption('Brainvita')
+pygame.display.set_icon(SPRT_MARBLE)

@@ -10,6 +10,8 @@ import platform
 from utils import Position
 import argparse
 
+import widgets
+
 Coordinate = namedtuple("Coordinate", ["x", "y"])
 
 # Mapping of board position to coordinates
@@ -90,6 +92,44 @@ class Brainvita:
         for pos in self.board._board:
             marble = Marble(pos, state=self.board._board[pos])
             self.marble_list.add(marble)
+
+        # Create the buttons
+        self.reset_button = widgets.ImageButton(
+            (20, 200),
+            c.SPRT_BTN,
+            hovered_surface=c.SPRT_BTN_HOVERED,
+            clicked_surface=c.SPRT_BTN_CLICKED,
+        )
+        self.dfs_button = widgets.ImageButton(
+            (20, 250),
+            c.SPRT_BTN,
+            hovered_surface=c.SPRT_DFS_BUTTON_HOVERED,
+            clicked_surface=c.SPRT_DFS_BUTTON_CLICKED,
+        )
+        self.bfs_button = widgets.ImageButton(
+            (20, 300),
+            c.SPRT_BFS_BUTTON,
+            hovered_surface=c.SPRT_BFS_BUTTON_HOVERED,
+            clicked_surface=c.SPRT_BFS_BUTTON_CLICKED,
+        )
+        self.bestfs_button = widgets.ImageButton(
+            (20, 350),
+            c.SPRT_BESTFS_BUTTON,
+            hovered_surface=c.SPRT_BESTFS_BUTTON_HOVERED,
+            clicked_surface=c.SPRT_BESTFS_BUTTON_CLICKED,
+        )
+        self.mute_button = widgets.ImageButton(
+            (20, 400),
+            c.SPRT_MUTE_BUTTON,
+            hovered_surface=c.SPRT_MUTE_BUTTON_HOVERED,
+            clicked_surface=c.SPRT_MUTE_BUTTON_CLICKED,
+        )
+        self.undo_button = widgets.ImageButton(
+            (20, 450),
+            c.SPRT_UNDO_BUTTON,
+            hovered_surface=c.SPRT_UNDO_BUTTON_HOVERED,
+            clicked_surface=c.SPRT_UNDO_BUTTON_CLICKED,
+        )
 
     def process_events(self) -> None:
         """
@@ -200,7 +240,7 @@ async def main(starting_state: str | None = None):
 
     if sys.platform == "emscripten":  # for web
         platform.window.canvas.style.imageRendering = "pixelated"
-    
+
     # Main game loop
     while not game.is_game_over:
 
@@ -215,6 +255,7 @@ async def main(starting_state: str | None = None):
 
     # Close window and exit
     pygame.quit()
+
 
 if sys.platform != "emscripten":
     # Parse command line arguments
