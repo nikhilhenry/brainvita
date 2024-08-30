@@ -6,6 +6,9 @@ from enum import Enum
 from collections import defaultdict
 from typing import Dict
 from utils import Position
+from search import Node
+from search import bread_first_search
+from copy import deepcopy
 
 
 class Move:
@@ -76,6 +79,10 @@ class Board:
                 if column > 1 and column < 5:
                     self._board[Position(row, column)] = NodeState.FILLED
 
+    def __hash__(self):
+        # construct a 2d array from the elements
+        return hash(str(self))
+
     def __str__(self):
         s = ""
         for row in range(self._SIZE):
@@ -84,6 +91,7 @@ class Board:
 
             s += "\n"
 
+        s += f"\nmarbles:{self.num_marbles}\n"
         return s
 
     def __getitem__(self, pos: Position):
@@ -140,9 +148,15 @@ class Board:
         if not ((mag_row == 2 and mag_col == 0) or (mag_row == 0 and mag_col == 2)):
             return None
 
+        # check that dst is present within the bounds
+        if dst.row >= self._SIZE or dst.column >= self._SIZE: 
+            return None
+
+        if dst.row < 0 or dst.column < 0: 
+            return None
         # making a new board state
         new_board = Board()
-        new_board._board = self._board
+        new_board._board = deepcopy(self._board)
         new_board.num_marbles = self.num_marbles
 
         # removing the marble from current pos
@@ -190,10 +204,19 @@ class Board:
                     for dest in possible_dests:
                         # compute the next states, can return a maximum of 4 valid states
                         new_board = self.make_move(Move(current, dest))
+                        if new_board == None:
+                            continue
                         # eliminating the states which do not respect the domain constraints
                         if (
-                            new_board != None and new_board.solvable()
+                            new_board != None 
                         ):  # check that we can progress from this state
+                            #if new_board.num_marbles == 32:
+                                #print("pre violation")
+                                #print(self)
+                                #print(current,dest)
+                                #print(new_board)
+                                #raise Exception("invalid board")
+                            #print(f"new board: {new_board.num_marbles}")
                             boards.append(new_board)
 
         return boards
@@ -211,7 +234,11 @@ Driver Testing Code
 if __name__ == "__main__":
     board = Board()
     print(board)
-    while True:
+    start_node = Node(board)
+    sequence = bread_first_search(start_node)
+    print(sequence)
+
+    while False:
         if board == None:
             print("invalid move please play better")
             break
