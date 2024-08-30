@@ -15,6 +15,8 @@ PATH_AUDIO = PATH_ROOT / "assets" / "audio"
 D_WIDTH = 1380
 D_HEIGHT = 768
 ROOT_DISPLAY = pygame.display.set_mode((D_WIDTH, D_HEIGHT))
+pygame.display.set_caption('Brainvita')
+
 
 # Main Clock
 TICK_RATE = 60
@@ -45,6 +47,7 @@ SPRT_SELECTED_MARBLE = pygame.image.load(PATH_SPRITES / "select_ring.png")
 SPRT_SELECTED_MARBLE = pygame.transform.scale(
     SPRT_SELECTED_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
 )  # scaling factor 3
+pygame.display.set_icon(SPRT_MARBLE)
 
 # "this is some new code hello wasm"
 
