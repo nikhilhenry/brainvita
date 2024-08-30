@@ -7,7 +7,6 @@ from search._node import Node
 def bread_first_search(start_node: Node):
     prev_marble_count = start_node.board.num_marbles
 
-    count = 0
     # keep track of all the visited states ie Board
     closed = set()
     # queue to store all the states that haven't been visited
@@ -19,7 +18,7 @@ def bread_first_search(start_node: Node):
         # print(f"Iter: {count}")
         # print(parent.board)
         # count += 1
-        if parent.board.goal_test() == True:
+        if parent.board.goal_test() is True:
             return parent.back_track()
         else:
             if prev_marble_count > parent.board.num_marbles:
@@ -33,7 +32,6 @@ def bread_first_search(start_node: Node):
                 child
                 for child in children
                 if child not in closed
-                or child not in [x.board for x in open]
             ]
             for child in children:
                 open.append(Node(child, parent))

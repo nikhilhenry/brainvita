@@ -22,7 +22,6 @@ def dhokla_first_search(start_node: Node):
                 child
                 for child in children
                 if child not in closed
-                or child not in [x.board for x in open]
             ]
 
             for child in children:

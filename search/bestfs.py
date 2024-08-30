@@ -13,7 +13,7 @@ def best_first_search(start_node: Node):
     while len(open) != 0:
         parent = heapq.heappop(open)
         # remove from the head
-        if parent.board.goal_test() == True:
+        if parent.board.goal_test() is True:
             return parent.back_track()
         else:
             if prev_marble_count > parent.board.num_marbles:

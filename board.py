@@ -4,6 +4,7 @@ Contains code to describe the current state of the game.
 
 from enum import Enum
 from collections import defaultdict
+import pickle
 from typing import Dict
 from search import dhokla_first_search, best_first_search, bread_first_search
 from utils import Position
@@ -246,11 +247,13 @@ if __name__ == "__main__":
     print(board)
     start_node = Node(board)
     st = time.time()
-    sequence = best_first_search(start_node)
+    sequence = bread_first_search(start_node)
     for board in sequence[::-1]:
         print(board)
     print(f"Time taken: {time.time() - st}s | Steps taken: {len(sequence)}")
-
+    
+    pickle.dump(sequence, open("sequence.pkl", "wb"))
+    
     while False:
         if board == None:
             print("invalid move please play better")
