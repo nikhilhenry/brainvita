@@ -18,11 +18,7 @@ def dhokla_first_search(start_node: Node):
             closed.append(parent.board)
             children: list = parent.board.move_gen()
 
-            children = [
-                child
-                for child in children
-                if child not in closed
-            ]
+            children = [child for child in children if child not in closed]
 
             for child in children:
                 open.append(Node(child, parent))

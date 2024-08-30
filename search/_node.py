@@ -12,7 +12,7 @@ class Node:
 
     def __lt__(self, other: Self):
         return self.board.num_marbles < other.board.num_marbles
-    
+
     def back_track(self, sequence=[]):
         """
         Traverse parents and returns a list of all ancestor including current node
@@ -20,6 +20,6 @@ class Node:
         if self.parent == None:
             sequence.append(self.board)
             return sequence
-        
+
         sequence.append(self.board)
         return self.parent.back_track(sequence)

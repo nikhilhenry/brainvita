@@ -24,14 +24,10 @@ def bread_first_search(start_node: Node):
             if prev_marble_count > parent.board.num_marbles:
                 prev_marble_count = parent.board.num_marbles
                 print(f"Marbles left: {parent.board.num_marbles}")
-                
+
             closed.add(parent.board)
             children = parent.board.move_gen()
             # removing already visited states
-            children = [
-                child
-                for child in children
-                if child not in closed
-            ]
+            children = [child for child in children if child not in closed]
             for child in children:
                 open.append(Node(child, parent))

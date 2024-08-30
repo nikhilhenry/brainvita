@@ -59,7 +59,11 @@ class Board:
 
         # state
         self.num_marbles = 32
-        self._board: Dict[Position, NodeState] = defaultdict(lambda: NodeState.INVALID)
+
+        def default_factory():
+            return NodeState.INVALID
+
+        self._board: Dict[Position, NodeState] = defaultdict(default_factory)
 
         # top sub grid
         for row in range(2):
@@ -94,7 +98,7 @@ class Board:
             s += "\n"
         s += f"\nmarbles:{self.num_marbles}\n"
         return s
-    
+
     def __repr__(self):
         return self.__str__()
 
@@ -110,14 +114,13 @@ class Board:
     def __eq__(self, other):
         return hash(self) == hash(other)
 
-
     def solvable(self):
         """
         Returns True if current arrangment of marbles allows for some marbles to be eliminated, else False.
         """
         if self.num_marbles == 1:
             return True
-        
+
         if self.num_marbles > 4:
             # some moves can still be made in this state
             return True
@@ -160,10 +163,10 @@ class Board:
             return None
 
         # check that dst is present within the bounds
-        if dst.row >= self._SIZE or dst.column >= self._SIZE: 
+        if dst.row >= self._SIZE or dst.column >= self._SIZE:
             return None
 
-        if dst.row < 0 or dst.column < 0: 
+        if dst.row < 0 or dst.column < 0:
             return None
         # making a new board state
         new_board = Board()
@@ -221,13 +224,13 @@ class Board:
                         if (
                             new_board != None and new_board.solvable()
                         ):  # check that we can progress from this state
-                            #if new_board.num_marbles == 32:
-                                #print("pre violation")
-                                #print(self)
-                                #print(current,dest)
-                                #print(new_board)
-                                #raise Exception("invalid board")
-                            #print(f"new board: {new_board.num_marbles}")
+                            # if new_board.num_marbles == 32:
+                            # print("pre violation")
+                            # print(self)
+                            # print(current,dest)
+                            # print(new_board)
+                            # raise Exception("invalid board")
+                            # print(f"new board: {new_board.num_marbles}")
                             boards.append(new_board)
 
         return boards
@@ -247,13 +250,13 @@ if __name__ == "__main__":
     print(board)
     start_node = Node(board)
     st = time.time()
-    sequence = bread_first_search(start_node)
+    sequence = best_first_search(start_node)
     for board in sequence[::-1]:
         print(board)
     print(f"Time taken: {time.time() - st}s | Steps taken: {len(sequence)}")
-    
-    pickle.dump(sequence, open("sequence.pkl", "wb"))
-    
+
+    pickle.dump([str(board) for board in sequence], open("sequence.pkl", "wb"))
+
     while False:
         if board == None:
             print("invalid move please play better")
