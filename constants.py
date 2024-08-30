@@ -30,15 +30,23 @@ FONT_UI = pygame.font.Font(PATH_FONTS / "silkscreen.ttf", 32)
 # Sprites
 SCALE_FACTOR = 3
 SPRT_MARBLE = pygame.image.load(PATH_SPRITES / "marble.png")  # 18x18
-SPRT_MARBLE = pygame.transform.scale(SPRT_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR))  # Scaling factor 3
+SPRT_MARBLE = pygame.transform.scale(
+    SPRT_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
+)  # Scaling factor 3
 SPRT_BOARD = pygame.image.load(PATH_SPRITES / "board.png")  # 198x198
-SPRT_BOARD = pygame.transform.scale(SPRT_BOARD, (198 * SCALE_FACTOR, 198 * SCALE_FACTOR))  # Scaling factor 3
+SPRT_BOARD = pygame.transform.scale(
+    SPRT_BOARD, (198 * SCALE_FACTOR, 198 * SCALE_FACTOR)
+)  # Scaling factor 3
 SPRT_POSSIBLE_MOVE = pygame.image.load(PATH_SPRITES / "possible_ring.png")
-SPRT_POSSIBLE_MOVE = pygame.transform.scale(SPRT_POSSIBLE_MOVE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR))  # Scaling factor 3
+SPRT_POSSIBLE_MOVE = pygame.transform.scale(
+    SPRT_POSSIBLE_MOVE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
+)  # Scaling factor 3
 SPRT_SELECTED_MARBLE = pygame.image.load(PATH_SPRITES / "select_ring.png")
-SPRT_SELECTED_MARBLE = pygame.transform.scale(SPRT_SELECTED_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR))  # scaling factor 3
+SPRT_SELECTED_MARBLE = pygame.transform.scale(
+    SPRT_SELECTED_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
+)  # scaling factor 3
 
-#"this is some new code hello wasm"
+# "this is some new code hello wasm"
 
 # Sounds
 SND_BG = pygame.mixer.Sound(str(PATH_AUDIO / "soundtrack.ogg"))
