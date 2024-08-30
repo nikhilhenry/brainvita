@@ -65,7 +65,16 @@ class Brainvita:
     def __init__(self, musician: MusicController) -> None:
 
         # Game state
-        self.board = Board()
+        s = """. . o o o . . 
+. . o o o . . 
+o o o o o o o 
+o o o x o o o 
+o o o o o o o 
+. . o o o . . 
+. . o o o . ."""
+
+        self.board = Board().construct_from_string(s)
+
         self.move_count = 0
         self.is_game_over = False
         self.selected_marble = None
