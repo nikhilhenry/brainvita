@@ -332,14 +332,17 @@ if __name__ == "__main__":
             else:
                 sequence.append(board)
                 if board.goal_test():
-                    print("Game Over!")
+                    print("Game Over! You won!")
+                    break
+                elif not board.solvable():
+                    print("Game Over - No more moves can be made! Better luck next time.")
                     break
 
         sequence = sequence[::-1] # store in reverse order
 
     print(
-        f"Time taken: {round(time.time() - st,3)}s | Steps taken to solve: {len(sequence)}"
+        f"Time taken: {round(time.time() - st,3)}s | Steps taken: {len(sequence)}"
     )
     pickle.dump([str(board) for board in sequence], open(args.savefile, "wb"))
 
-    print(f"(Reverse) Sequence of moves saved to {args.savefile}")
+    print(f"(Reverse) Sequence of moves saved to {args.savefile}.")
