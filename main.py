@@ -12,7 +12,6 @@ from search import (
     stepped_best_first_search,
     stepped_bread_first_search,
 )
-from utils import Position
 import argparse
 
 import widgets
@@ -183,6 +182,11 @@ class Brainvita:
                                     self.selected_marble = None
                                     self.possible_positions = []
 
+                                    if self.board.goal_test():
+                                        self.game_state = GameState.WIN
+                                    elif not self.board.solvable():
+                                        self.game_state = GameState.LOST
+
                 # get which button is clicked (if any)
                 button: widgets.ImageButton | widgets.ImageToggleButton
                 for button in self.button_list:
@@ -299,7 +303,19 @@ class Brainvita:
                 f"{f'{self.algorithm} ON':>30}", False, (26, 150, 28)
             )
             c.ROOT_DISPLAY.blit(rendered_text, (350, 50))
-        
+
+            # render algorithm statistics
+
+        elif self.game_state == GameState.WIN:
+
+            rendered_text = c.FONT_MAIN.render(f"{'WIN!':>30}", False, (26, 150, 28))
+            c.ROOT_DISPLAY.blit(rendered_text, (400, 50))
+
+        elif self.game_state == GameState.LOST:
+
+            rendered_text = c.FONT_MAIN.render(f"{'LOST!':>30}", False, (184, 33, 33))
+            c.ROOT_DISPLAY.blit(rendered_text, (400, 50))
+
         self.button_list.draw(c.ROOT_DISPLAY)
 
         pygame.display.flip()
