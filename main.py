@@ -74,37 +74,38 @@ class Brainvita:
             self.marble_list.add(marble)
 
         # Create the buttons
-        self.reset_button = widgets.ImageButton(
-            (20, 200),
-            c.SPRT_RESTART_BTN,
-            hovered_surface=c.SPRT_RESTART_BTN_CLICKED,
-            clicked_surface=c.SPRT_RESTART_BTN_CLICKED,
-        )
         self.dfs_button = widgets.ImageButton(
-            (20, 250),
+            (30, 200),
             c.SPRT_DFS_BTN,
             hovered_surface=c.SPRT_DFS_BTN_CLICKED,
             clicked_surface=c.SPRT_DFS_BTN_CLICKED,
         )
         self.bfs_button = widgets.ImageButton(
-            (20, 300),
+            (30, 200 + 60),
             c.SPRT_BFS_BTN,
             hovered_surface=c.SPRT_BFS_BTN_CLICKED,
             clicked_surface=c.SPRT_BFS_BTN_CLICKED,
         )
         self.bestfs_button = widgets.ImageButton(
-            (20, 350),
+            (30, 260 + 60),
             c.SPRT_BESTFS_BTN,
             hovered_surface=c.SPRT_BESTFS_BTN_CLICKED,
             clicked_surface=c.SPRT_BESTFS_BTN_CLICKED,
         )
+
+        self.reset_button = widgets.ImageButton(
+            (30, 400),
+            c.SPRT_RESTART_BTN,
+            hovered_surface=c.SPRT_RESTART_BTN_CLICKED,
+            clicked_surface=c.SPRT_RESTART_BTN_CLICKED,
+        )
         self.mute_button = widgets.ImageToggleButton(
-            (20, 400),
+            (30 + 64 + 5, 400),
             c.SPRT_MUSIC_ON_BTN,
             c.SPRT_MUSIC_OFF_BTN,
         )
         self.undo_button = widgets.ImageButton(
-            (20, 450),
+            (99 + 64 + 5, 400),
             c.SPRT_UNDO_BTN,
             hovered_surface=c.SPRT_UNDO_BTN_CLICKED,
             clicked_surface=c.SPRT_UNDO_BTN_CLICKED,
