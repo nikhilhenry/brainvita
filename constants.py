@@ -63,8 +63,10 @@ SPRT_DFS_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "dfs_button2.png")
 SPRT_BESTFS_BTN = pygame.image.load(PATH_SPRITES / "bst_button1.png")
 SPRT_BESTFS_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "bst_button2.png")
 
-SPRT_MUSIC_OFF_BTN = pygame.image.load(PATH_SPRITES / "music_off.png")
-SPRT_MUSIC_ON_BTN = pygame.image.load(PATH_SPRITES / "music_on.png")
+SPRT_MUSIC_OFF_BTN_HOVERED = pygame.image.load(PATH_SPRITES / "music_bg4.png")
+SPRT_MUSIC_OFF_BTN = pygame.image.load(PATH_SPRITES / "music_bg3.png")
+SPRT_MUSIC_ON_BTN_HOVERED = pygame.image.load(PATH_SPRITES / "music_bg2.png")
+SPRT_MUSIC_ON_BTN = pygame.image.load(PATH_SPRITES / "music_bg1.png")
 
 SPRT_RESTART_BTN = pygame.image.load(PATH_SPRITES / "reset1.png")
 SPRT_RESTART_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "reset2.png")

@@ -103,6 +103,8 @@ class Brainvita:
             (30 + 64 + 5, 400),
             c.SPRT_MUSIC_ON_BTN,
             c.SPRT_MUSIC_OFF_BTN,
+            c.SPRT_MUSIC_ON_BTN_HOVERED,
+            c.SPRT_MUSIC_OFF_BTN_HOVERED,
         )
         self.undo_button = widgets.ImageButton(
             (99 + 64 + 5, 400),
