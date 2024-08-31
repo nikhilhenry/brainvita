@@ -33,7 +33,7 @@ pygame.init()
 
 
 class Marble(pygame.sprite.Sprite):
-    def __init__(self, pos: Position, state: NodeState) -> None:
+    def __init__(self, pos: Position, state: NodeState):
         super().__init__()
 
         self.image = c.SPRT_MARBLE
@@ -103,32 +103,48 @@ class Brainvita:
         self.dfs_button = widgets.ImageButton(
             (20, 250),
             c.SPRT_BTN,
-            hovered_surface=c.SPRT_DFS_BUTTON_HOVERED,
-            clicked_surface=c.SPRT_DFS_BUTTON_CLICKED,
+            hovered_surface=c.SPRT_BTN_HOVERED,
+            clicked_surface=c.SPRT_BTN_CLICKED,
         )
         self.bfs_button = widgets.ImageButton(
             (20, 300),
-            c.SPRT_BFS_BUTTON,
-            hovered_surface=c.SPRT_BFS_BUTTON_HOVERED,
-            clicked_surface=c.SPRT_BFS_BUTTON_CLICKED,
+            c.SPRT_BTN,
+            hovered_surface=c.SPRT_BTN_HOVERED,
+            clicked_surface=c.SPRT_BTN_CLICKED,
         )
         self.bestfs_button = widgets.ImageButton(
             (20, 350),
-            c.SPRT_BESTFS_BUTTON,
-            hovered_surface=c.SPRT_BESTFS_BUTTON_HOVERED,
-            clicked_surface=c.SPRT_BESTFS_BUTTON_CLICKED,
+            c.SPRT_BTN,
+            hovered_surface=c.SPRT_BTN_HOVERED,
+            clicked_surface=c.SPRT_BTN_CLICKED,
         )
         self.mute_button = widgets.ImageButton(
             (20, 400),
-            c.SPRT_MUTE_BUTTON,
-            hovered_surface=c.SPRT_MUTE_BUTTON_HOVERED,
-            clicked_surface=c.SPRT_MUTE_BUTTON_CLICKED,
+            c.SPRT_BTN,
+            hovered_surface=c.SPRT_BTN_HOVERED,
+            clicked_surface=c.SPRT_BTN_CLICKED,
+        )
+        self.unmute_button = widgets.ImageButton(
+            (200, 400),
+            c.SPRT_BTN,
+            hovered_surface=c.SPRT_BTN_HOVERED,
+            clicked_surface=c.SPRT_BTN_CLICKED,
         )
         self.undo_button = widgets.ImageButton(
             (20, 450),
-            c.SPRT_UNDO_BUTTON,
-            hovered_surface=c.SPRT_UNDO_BUTTON_HOVERED,
-            clicked_surface=c.SPRT_UNDO_BUTTON_CLICKED,
+            c.SPRT_BTN,
+            hovered_surface=c.SPRT_BTN_HOVERED,
+            clicked_surface=c.SPRT_BTN_CLICKED,
+        )
+        self.button_list = pygame.sprite.Group()
+        self.button_list.add(
+            self.reset_button,
+            self.dfs_button,
+            self.bfs_button,
+            self.bestfs_button,
+            self.mute_button,
+            self.unmute_button,
+            self.undo_button,
         )
 
     def process_events(self) -> None:
@@ -139,6 +155,11 @@ class Brainvita:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_game_over = True
+            if event.type == pygame.MOUSEMOTION:
+                # update button hover state
+                for button in self.button_list:
+                    button.update()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # get which marble is hovered and clicked (if any)
                 for marble in self.marble_list:
@@ -146,7 +167,7 @@ class Brainvita:
                         # mark marble as selected, prompting move generation
                         self.selected_marble = marble
                         self.musician.play_select_sound()
-
+                
                 # get which possible move is clicked (if any)
                 for move in self.possible_positions:
                     if (
@@ -170,6 +191,12 @@ class Brainvita:
                                 self.update_marbles_based_on_board()
                                 self.selected_marble = None
                                 self.possible_positions = []
+                
+                # get which button is clicked (if any)
+                button: widgets.ImageButton
+                for button in self.button_list:
+                    if button.hovered:
+                        button.is_clicked = True
 
     def update_marbles_based_on_board(self):
         """
@@ -188,6 +215,39 @@ class Brainvita:
                 self.selected_marble.pos
             )
             self.possible_positions = move_locations
+        
+    
+        if self.reset_button.is_clicked:
+            self.board = Board()
+            self.move_count = 0
+            self.update_marbles_based_on_board()
+            self.selected_marble = None
+            self.possible_positions = []
+            self.reset_button.is_clicked = False
+        elif self.dfs_button.is_clicked:
+            # self.board = self.board.solve_dfs()
+            # self.update_marbles_based_on_board()
+            self.dfs_button.is_clicked = False
+        elif self.bfs_button.is_clicked:
+            # self.board = self.board.solve_bfs()
+            # self.update_marbles_based_on_board()
+            self.bfs_button.is_clicked = False
+        elif self.bestfs_button.is_clicked:
+            # self.board = self.board.solve_bestfs()
+            # self.update_marbles_based_on_board()
+            self.bestfs_button.is_clicked = False
+        elif self.mute_button.is_clicked:
+            self.musician.mute()
+            self.mute_button.is_clicked = False
+        elif self.unmute_button.is_clicked:
+            self.musician.unmute()
+            self.unmute_button.is_clicked = False
+        elif self.undo_button.is_clicked:
+            # if self.move_count > 0:
+            #     self.board = self.board.undo()
+            #     self.move_count -= 1
+            #     self.update_marbles_based_on_board()
+            self.undo_button.is_clicked = False
 
     def display(self):
         """
@@ -229,6 +289,8 @@ class Brainvita:
                     c.SPRT_POSSIBLE_MOVE,
                     (POS2COORD[move].x, POS2COORD[move].y),
                 )
+
+        self.button_list.draw(c.ROOT_DISPLAY)
         pygame.display.flip()
 
 

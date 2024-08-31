@@ -49,8 +49,11 @@ SPRT_SELECTED_MARBLE = pygame.transform.scale(
 
 # Buttons
 SPRT_BTN = pygame.image.load(PATH_SPRITES / "temp_buttonNormal.png")
+SPRT_BTN = pygame.transform.scale(SPRT_BTN, (100, 30))
 SPRT_BTN_HOVERED = pygame.image.load(PATH_SPRITES / "temp_buttonHover.png")
+SPRT_BTN_HOVERED = pygame.transform.scale(SPRT_BTN_HOVERED, (100, 30))
 SPRT_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "temp_buttonPressed.png")
+SPRT_BTN_CLICKED = pygame.transform.scale(SPRT_BTN_CLICKED, (100, 30))
 
 # Sounds
 SND_BG = pygame.mixer.Sound(str(PATH_AUDIO / "soundtrack.ogg"))
