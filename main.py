@@ -23,7 +23,11 @@ pygame.init()
 
 
 class GameState(enum.Enum):
-    MANUAL = 0
+    """
+    An enum to represent the game state, for animation and showing the game over screen.
+    """
+
+    MANUAL = 0  # default game state is manual
     ANIMATING = 1
     LOST = 2
     WIN = 3
@@ -44,7 +48,7 @@ class Brainvita:
         else:
             self.board = Board()
 
-        self.game_state = GameState.MANUAL  # default game state is manual
+        self.game_state = GameState.MANUAL
         self.algorithm = None
         self.autovars_open = None
         self.autovars_closed = set()
@@ -58,10 +62,8 @@ class Brainvita:
         self.musician = musician
         self.musician.start()
 
-        # Create sprite lists
-        self.marble_list = pygame.sprite.Group()
-
         # Create the marble sprites
+        self.marble_list = pygame.sprite.Group()
         for pos in self.board._board:
             marble = Marble(pos, state=self.board._board[pos])
             self.marble_list.add(marble)
@@ -91,8 +93,6 @@ class Brainvita:
             hovered_surface=c.SPRT_BESTFS_BTN_CLICKED,
             clicked_surface=c.SPRT_BESTFS_BTN_CLICKED,
         )
-
-        # TODO: Convert to Button type toggle
         self.mute_button = widgets.ImageToggleButton(
             (20, 400),
             c.SPRT_MUSIC_ON_BTN,
@@ -105,8 +105,7 @@ class Brainvita:
             clicked_surface=c.SPRT_UNDO_BTN_CLICKED,
         )
 
-        self.button_list = pygame.sprite.Group()
-        self.button_list.add(
+        self.button_list = pygame.sprite.Group(
             self.reset_button,
             self.dfs_button,
             self.bfs_button,
@@ -115,9 +114,30 @@ class Brainvita:
             self.undo_button,
         )
 
+    def reset_base(self):
+        self.board = Board()
+        self.move_count = 0
+        self.game_state = GameState.MANUAL
+        self.algorithm = None
+        self.autovars_closed = set()
+        self.autovars_open = None
+
+        self.update_marble_state()
+        self.selected_marble = None
+        self.possible_positions = []
+
+    def update_marble_state(self):
+        """
+        Update the marble states based on the board state
+        """
+        for marble in self.marble_list:
+            marble.update(marble.pos, self.board[marble.pos])
+
     def process_events(self) -> None:
         """
-        Process all events
+        Process all events. This includes mouse clicks, button clicks, etc.
+        This shouldn't contain logic, but it should call the appropriate methods.
+        It should update the game state based on the events.
         """
 
         for event in pygame.event.get():
@@ -129,11 +149,11 @@ class Brainvita:
                     button.update()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # get which marble is hovered and clicked (if any)
                 if self.game_state == GameState.MANUAL:
+                    # get which marble is hovered and clicked (if any)
                     for marble in self.marble_list:
                         if marble.rect.collidepoint(event.pos):
-                            # mark marble as selected, prompting move generation
+                            # mark marble as selected, prompting move generation for that marble
                             self.selected_marble = marble
                             self.musician.play_select_sound()
 
@@ -142,12 +162,14 @@ class Brainvita:
                         if (
                             c.POS2COORD[move].x
                             < event.pos[0]
-                            < c.POS2COORD[move].x + 18 * c.SCALE_FACTOR
+                            < c.POS2COORD[move].x
+                            + 18 * c.SCALE_FACTOR  # 18 is the width of the marble
                         ):
                             if (
                                 c.POS2COORD[move].y
                                 < event.pos[1]
-                                < c.POS2COORD[move].y + 18 * c.SCALE_FACTOR
+                                < c.POS2COORD[move].y
+                                + 18 * c.SCALE_FACTOR  # 18 is the height of the marble
                             ):
                                 # move the marble
                                 new_board = self.board.make_move(
@@ -157,50 +179,25 @@ class Brainvita:
                                     self.musician.play_move_sound()
                                     self.board = new_board
                                     self.move_count += 1
-                                    self.update_marbles_based_on_board()
+                                    self.update_marble_state()
                                     self.selected_marble = None
                                     self.possible_positions = []
 
                 # get which button is clicked (if any)
-                button: widgets.ImageButton
+                button: widgets.ImageButton | widgets.ImageToggleButton
                 for button in self.button_list:
                     if button.hovered:
                         button.click()
 
-    def update_marbles_based_on_board(self):
+    def main_logic(self):
         """
-        Update the marbles based on the board state
-        """
-        for marble in self.marble_list:
-            marble.update(marble.pos, self.board[marble.pos])
-
-    def reset(self):
-        self.board = Board()
-        self.move_count = 0
-        self.game_state = GameState.MANUAL
-        self.algorithm = None
-        self.autovars_closed = set()
-        self.autovars_open = None
-
-        self.update_marbles_based_on_board()
-        self.selected_marble = None
-        self.possible_positions = []
-
-    def main_loop(self):
-        """
-        Main game loop for Brainvita.
+        Main game logic loop for Brainvita.
         """
 
-        if self.selected_marble:
-            move_locations = self.board.get_possible_move_locations(
-                self.selected_marble.pos
-            )
-            self.possible_positions = move_locations
-
+        # Button logic
         if self.reset_button.is_clicked:
-            self.reset()
+            self.reset_base()
             self.reset_button.unclick()
-
         elif self.dfs_button.is_clicked:
             if self.game_state != GameState.ANIMATING:
                 self.game_state = GameState.ANIMATING
@@ -216,7 +213,6 @@ class Brainvita:
                 self.game_state = GameState.ANIMATING
                 self.algorithm = "bestfs"
             self.bestfs_button.unclick()
-
         elif self.undo_button.is_clicked:
             # if self.move_count > 0:
             #     self.board = self.board.undo()
@@ -230,50 +226,29 @@ class Brainvita:
             if not self.musician.is_playing:
                 self.musician.unmute()
 
-        if self.game_state == GameState.ANIMATING:
+        # Game logic
+        if self.game_state == GameState.MANUAL:
+            if self.selected_marble:
+                move_locations = self.board.get_possible_move_locations(
+                    self.selected_marble.pos
+                )
+                self.possible_positions = move_locations
+        elif self.game_state == GameState.ANIMATING:
             if self.algorithm == "dfs":
-                game_over, self.board, self.autovars_open, self.autovars_closed = (
-                    stepped_dhokla_first_search(
-                        Node(self.board), self.autovars_open, self.autovars_closed
-                    )
-                )
-                self.move_count += 1
-
-                if game_over:
-                    self.game_state = GameState.WIN
-                    self.reset()
-
-                self.update_marbles_based_on_board()
-
+                function = stepped_dhokla_first_search
             elif self.algorithm == "bfs":
-
-                game_over, self.board, self.autovars_open, self.autovars_closed = (
-                    stepped_bread_first_search(
-                        Node(self.board), self.autovars_open, self.autovars_closed
-                    )
-                )
-                self.move_count += 1
-
-                if game_over:
-                    self.game_state = GameState.WIN
-                    self.reset()
-
-                self.update_marbles_based_on_board()
-
+                function = stepped_bread_first_search
             elif self.algorithm == "bestfs":
+                function = stepped_best_first_search
 
-                game_over, self.board, self.autovars_open, self.autovars_closed = (
-                    stepped_best_first_search(
-                        Node(self.board), self.autovars_open, self.autovars_closed
-                    )
-                )
-                self.move_count += 1
+            game_over, self.board, self.autovars_open, self.autovars_closed = function(
+                Node(self.board), self.autovars_open, self.autovars_closed
+            )
+            self.update_marble_state()
+            self.move_count += 1
 
-                if game_over:
-                    self.game_state = GameState.WIN
-                    self.reset()
-
-                self.update_marbles_based_on_board()
+            if game_over:
+                self.game_state = GameState.WIN
 
     def display(self):
         """
@@ -305,19 +280,28 @@ class Brainvita:
 
         self.marble_list.draw(c.ROOT_DISPLAY)
 
-        if self.selected_marble:
-            c.ROOT_DISPLAY.blit(
-                c.SPRT_SELECTED_MARBLE,
-                (self.selected_marble.rect.x, self.selected_marble.rect.y),
-            )
-        if self.possible_positions:
-            for move in self.possible_positions:
-                c.ROOT_DISPLAY.blit(
-                    c.SPRT_POSSIBLE_MOVE,
-                    (POS2COORD[move].x, POS2COORD[move].y),
-                )
+        if self.game_state == GameState.MANUAL:
 
+            if self.selected_marble:
+                c.ROOT_DISPLAY.blit(
+                    c.SPRT_SELECTED_MARBLE,
+                    (self.selected_marble.rect.x, self.selected_marble.rect.y),
+                )
+            if self.possible_positions:
+                for move in self.possible_positions:
+                    c.ROOT_DISPLAY.blit(
+                        c.SPRT_POSSIBLE_MOVE,
+                        (c.POS2COORD[move].x, c.POS2COORD[move].y),
+                    )
+        elif self.game_state == GameState.ANIMATING:
+
+            rendered_text = c.FONT_MAIN.render(
+                f"{f'{self.algorithm} ON':>30}", False, (26, 150, 28)
+            )
+            c.ROOT_DISPLAY.blit(rendered_text, (350, 50))
+        
         self.button_list.draw(c.ROOT_DISPLAY)
+
         pygame.display.flip()
 
 
@@ -336,7 +320,7 @@ async def main(starting_state: str | None = None):
         # Process events (keystrokes, mouse clicks, etc)
         game.process_events()
         # Update object positions, run game logic
-        game.main_loop()
+        game.main_logic()
         # Draw the current frame
         game.display()
         c.GAME_CLOCK.tick(c.TICK_RATE)
