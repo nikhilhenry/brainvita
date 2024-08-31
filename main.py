@@ -57,11 +57,11 @@ class Brainvita:
             "end_time": 0,
             "steps": 0,
         }
-
         self.move_count = 0
         self.is_game_over = False
         self.selected_marble = None
         self.possible_positions = []
+        self.undo_stack = []
 
         # musician
         self.musician = musician
@@ -136,6 +136,7 @@ class Brainvita:
         self.update_marble_state()
         self.selected_marble = None
         self.possible_positions = []
+        self.undo_stack = []
 
     def update_marble_state(self):
         """
@@ -187,13 +188,13 @@ class Brainvita:
                                     Move(self.selected_marble.pos, move)
                                 )
                                 if new_board:
+                                    self.undo_stack.append(self.board)
                                     self.musician.play_move_sound()
                                     self.board = new_board
                                     self.move_count += 1
                                     self.update_marble_state()
                                     self.selected_marble = None
                                     self.possible_positions = []
-
                                     if self.board.goal_test():
                                         self.game_state = GameState.WIN
                                     elif not self.board.solvable():
@@ -233,10 +234,10 @@ class Brainvita:
                 self.autostats["start_time"] = time.time()
             self.bestfs_button.unclick()
         elif self.undo_button.is_clicked:
-            # if self.move_count > 0:
-            #     self.board = self.board.undo()
-            #     self.move_count -= 1
-            #     self.update_marbles_based_on_board()
+            if self.game_state == GameState.MANUAL and len(self.undo_stack) > 0:
+                self.board = self.undo_stack.pop()
+                self.move_count += 1  # undoing a move is also a move
+                self.update_marble_state()
             self.undo_button.unclick()
 
         if self.mute_button.is_toggled:
