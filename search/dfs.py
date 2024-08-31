@@ -36,7 +36,7 @@ def stepped_dhokla_first_search(node: Node, open: list[Node] | None, closed: set
     parent = open.pop()
 
     if parent.board.goal_test():
-        return True, parent.board, open, closed
+        return True, parent, open, closed
     else:
 
         closed.add(parent.board)
@@ -47,4 +47,4 @@ def stepped_dhokla_first_search(node: Node, open: list[Node] | None, closed: set
         for child in children:
             open.append(Node(child, parent))
 
-        return False, parent.board, open, closed
+        return False, parent, open, closed

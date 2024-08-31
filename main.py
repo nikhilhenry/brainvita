@@ -1,5 +1,6 @@
 import asyncio
 import enum
+import time
 import pygame
 import constants as c
 from board import Board, Move, NodeState
@@ -51,6 +52,11 @@ class Brainvita:
         self.algorithm = None
         self.autovars_open = None
         self.autovars_closed = set()
+        self.autostats = {
+            "start_time": 0,
+            "end_time": 0,
+            "steps": 0,
+        }
 
         self.move_count = 0
         self.is_game_over = False
@@ -120,6 +126,11 @@ class Brainvita:
         self.algorithm = None
         self.autovars_closed = set()
         self.autovars_open = None
+        self.autostats = {
+            "start_time": 0,
+            "end_time": 0,
+            "steps": 0,
+        }
 
         self.update_marble_state()
         self.selected_marble = None
@@ -206,16 +217,19 @@ class Brainvita:
             if self.game_state != GameState.ANIMATING:
                 self.game_state = GameState.ANIMATING
                 self.algorithm = "dfs"
+                self.autostats["start_time"] = time.time()
             self.dfs_button.unclick()
         elif self.bfs_button.is_clicked:
             if self.game_state != GameState.ANIMATING:
                 self.game_state = GameState.ANIMATING
                 self.algorithm = "bfs"
+                self.autostats["start_time"] = time.time()
             self.bfs_button.unclick()
         elif self.bestfs_button.is_clicked:
             if self.game_state != GameState.ANIMATING:
                 self.game_state = GameState.ANIMATING
                 self.algorithm = "bestfs"
+                self.autostats["start_time"] = time.time()
             self.bestfs_button.unclick()
         elif self.undo_button.is_clicked:
             # if self.move_count > 0:
@@ -245,9 +259,12 @@ class Brainvita:
             elif self.algorithm == "bestfs":
                 function = stepped_best_first_search
 
-            game_over, self.board, self.autovars_open, self.autovars_closed = function(
+            game_over, board_node, self.autovars_open, self.autovars_closed = function(
                 Node(self.board), self.autovars_open, self.autovars_closed
             )
+            self.board = board_node.board
+            self.autostats["steps"] = len(board_node.back_track())
+            self.autostats["end_time"] = time.time()
             self.update_marble_state()
             self.move_count += 1
 
@@ -308,7 +325,8 @@ class Brainvita:
 
         elif self.game_state == GameState.WIN:
 
-            rendered_text = c.FONT_MAIN.render(f"{'WIN!':>30}", False, (26, 150, 28))
+            rendered_text = c.FONT_MAIN.render("WIN!", False, (26, 150, 28))
+            c.ROOT_DISPLAY.blit(rendered_text, (990, 50))
 
             marble: Marble
             for marble in self.marble_list:
@@ -317,12 +335,22 @@ class Brainvita:
                         c.SPRT_MARBLE_WIN,
                         (marble.rect.x, marble.rect.y),
                     )
-            c.ROOT_DISPLAY.blit(rendered_text, (400, 50))
+
+            rendered_text = c.FONT_UI_MONO.render(
+                f"{'Time:':<8}{round(self.autostats['end_time']-self.autostats['start_time'], 2):>6}s",
+                False,
+                (0, 0, 0),
+            )
+            c.ROOT_DISPLAY.blit(rendered_text, (1000, 120))
+            rendered_text = c.FONT_UI_MONO.render(
+                f"{'PathLen:':<8}{self.autostats['steps']:>7}", False, (0, 0, 0)
+            )
+            c.ROOT_DISPLAY.blit(rendered_text, (1000, 150))
 
         elif self.game_state == GameState.LOST:
 
-            rendered_text = c.FONT_MAIN.render(f"{'LOST!':>30}", False, (184, 33, 33))
-            c.ROOT_DISPLAY.blit(rendered_text, (400, 50))
+            rendered_text = c.FONT_MAIN.render("LOST!", False, (184, 33, 33))
+            c.ROOT_DISPLAY.blit(rendered_text, (990, 50))
 
         self.button_list.draw(c.ROOT_DISPLAY)
 

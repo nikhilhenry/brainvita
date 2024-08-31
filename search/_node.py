@@ -17,6 +17,7 @@ class Node:
         """
         Traverse parents and returns a list of all ancestor including current node
         """
+        sequence = sequence[:]
         if self.parent == None:
             sequence.append(self.board)
             return sequence
