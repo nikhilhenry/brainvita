@@ -8,7 +8,7 @@ from collections import namedtuple
 from music_controller import MusicController
 import sys
 import platform
-from search import Node, step_by_step_dhokla_first_search
+from search import Node, stepped_dhokla_first_search, stepped_best_first_search, stepped_bread_first_search
 from utils import Position
 import argparse
 
@@ -88,7 +88,7 @@ class Brainvita:
         self.game_state = GameState.MANUAL  # default game state is manual
         self.algorithm = None
         self.autovars_open = None
-        self.autovars_closed = []
+        self.autovars_closed = set()
 
         self.move_count = 0
         self.is_game_over = False
@@ -220,7 +220,7 @@ class Brainvita:
         self.move_count = 0
         self.game_state = GameState.MANUAL
         self.algorithm = None
-        self.autovars_closed = []
+        self.autovars_closed = set()
         self.autovars_open = None
 
         self.update_marbles_based_on_board()
@@ -241,7 +241,7 @@ class Brainvita:
         if self.reset_button.is_clicked:
             self.reset()
             self.reset_button.unclick()
-        
+
         elif self.dfs_button.is_clicked:
             if self.game_state != GameState.ANIMATING:
                 self.game_state = GameState.ANIMATING
@@ -273,42 +273,48 @@ class Brainvita:
 
         if self.game_state == GameState.ANIMATING:
             if self.algorithm == "dfs":
-                game_over, temp_board, self.autovars_open, self.autovars_closed = (
-                    step_by_step_dhokla_first_search(
+                game_over, self.board, self.autovars_open, self.autovars_closed = (
+                    stepped_dhokla_first_search(
                         Node(self.board), self.autovars_open, self.autovars_closed
                     )
                 )
-                if temp_board is not None:
-                    self.board = temp_board
-                else:
-                    self.game_state = GameState.MANUAL
-                    self.move_count += 1
-                    self.update_marbles_based_on_board()
+                self.move_count += 1
+
                 if game_over:
-                    self.game_state = GameState.WIN 
+                    self.game_state = GameState.WIN
                     self.reset()
 
-                self.move_count += 1
                 self.update_marbles_based_on_board()
+
             elif self.algorithm == "bfs":
-                # self.board, self.autovars_open, self.autovars_closed = (
-                #     step_by_step_bread_first_search(
-                #         Node(self.board), self.autovars_open, self.autovars_closed
-                #     )
-                # )
+               
+                game_over, self.board, self.autovars_open, self.autovars_closed = (
+                    stepped_bread_first_search(
+                        Node(self.board), self.autovars_open, self.autovars_closed
+                    )
+                )
                 self.move_count += 1
+
+                if game_over:
+                    self.game_state = GameState.WIN
+                    self.reset()
+
                 self.update_marbles_based_on_board()
 
             elif self.algorithm == "bestfs":
-                
-                # self.board, self.autovars_open, self.autovars_closed = (
-                #     step_by_step_best_first_search(
-                #         Node(self.board), self.autovars_open, self.autovars_closed
-                #     )
-                # )
-                self.move_count += 1
-                self.update_marbles_based_on_board()
 
+                game_over, self.board, self.autovars_open, self.autovars_closed = (
+                    stepped_best_first_search(
+                        Node(self.board), self.autovars_open, self.autovars_closed
+                    )
+                )
+                self.move_count += 1
+
+                if game_over:
+                    self.game_state = GameState.WIN
+                    self.reset()
+
+                self.update_marbles_based_on_board()
 
     def display(self):
         """
@@ -328,15 +334,15 @@ class Brainvita:
 
         rendered_text = c.FONT_MAIN.render("Brainvita", False, (0, 0, 0))
         c.ROOT_DISPLAY.blit(rendered_text, (20, 50))
-        rendered_text = c.FONT_UI.render(
+        rendered_text = c.FONT_UI_MONO.render(
             f"{'Moves:':<10}{self.move_count:>6}", False, (0, 0, 0)
         )
-        c.ROOT_DISPLAY.blit(rendered_text, (20, 120))
+        c.ROOT_DISPLAY.blit(rendered_text, (30, 120))
 
-        rendered_text = c.FONT_UI.render(
+        rendered_text = c.FONT_UI_MONO.render(
             f"{'Marbles:':<10}{self.board.num_marbles:>6}", False, (0, 0, 0)
         )
-        c.ROOT_DISPLAY.blit(rendered_text, (20, 150))
+        c.ROOT_DISPLAY.blit(rendered_text, (30, 150))
 
         self.marble_list.draw(c.ROOT_DISPLAY)
 

@@ -27,6 +27,7 @@ CLR_BACKGROUND = (209, 219, 228)  # #d1dbe4
 # Fonts
 FONT_MAIN = pygame.font.Font(PATH_FONTS / "silkscreen.ttf", 64)
 FONT_UI = pygame.font.Font(PATH_FONTS / "silkscreen.ttf", 32)
+FONT_UI_MONO = pygame.font.Font(PATH_FONTS / "synchronizer_nbp.ttf", 24)
 
 # Sprites
 SCALE_FACTOR = 3
