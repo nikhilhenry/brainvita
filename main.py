@@ -200,7 +200,7 @@ async def main(starting_state: str | None = None):
 
     if sys.platform == "emscripten":  # for web
         platform.window.canvas.style.imageRendering = "pixelated"
-    
+
     # Main game loop
     while not game.is_game_over:
 
@@ -215,6 +215,7 @@ async def main(starting_state: str | None = None):
 
     # Close window and exit
     pygame.quit()
+
 
 if sys.platform != "emscripten":
     # Parse command line arguments

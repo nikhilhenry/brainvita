@@ -15,7 +15,7 @@ PATH_AUDIO = PATH_ROOT / "assets" / "audio"
 D_WIDTH = 1380
 D_HEIGHT = 768
 ROOT_DISPLAY = pygame.display.set_mode((D_WIDTH, D_HEIGHT))
-pygame.display.set_caption('Brainvita')
+pygame.display.set_caption("Brainvita")
 
 
 # Main Clock

@@ -10,3 +10,4 @@ __pycache__/
 /dist
 
 *.pkl
+start_file.txt
