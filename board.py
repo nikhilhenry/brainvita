@@ -315,24 +315,34 @@ if __name__ == "__main__":
         print("Using Best First Search")
         sequence = best_first_search(start_node)
     else:
+        sequence = [board]
         old_board = None
         while True:
-            if board is None:
-                print("Invalid Move!")
-                board = old_board
-
             print(board)
             src_x = int(input("Enter src row: "))
-            src_y = int(input("Enter src column: "))
+            src_y = int(input("Enter src col: "))
             dst_x = int(input("Enter dst row: "))
-            dst_y = int(input("Enter dst column: "))
+            dst_y = int(input("Enter dst col: "))
             move = Move(Position(src_x, src_y), Position(dst_x, dst_y))
             old_board = board
             board = board.make_move(move)
+            if board is None:
+                print("Invalid Move!")
+                board = old_board
+            else:
+                sequence.append(board)
+                if board.goal_test():
+                    print("Game Over! You won!")
+                    break
+                elif not board.solvable():
+                    print(
+                        "Game Over - No more moves can be made! Better luck next time."
+                    )
+                    break
 
-    print(
-        f"Time taken: {round(time.time() - st,3)}s | Steps taken to solve: {len(sequence)}"
-    )
+        sequence = sequence[::-1]  # store in reverse order
+
+    print(f"Time taken: {round(time.time() - st,3)}s | Steps taken: {len(sequence)}")
     pickle.dump([str(board) for board in sequence], open(args.savefile, "wb"))
 
-    print(f"(Reverse) Sequence of moves saved to {args.savefile}")
+    print(f"(Reverse) Sequence of moves saved to {args.savefile}.")

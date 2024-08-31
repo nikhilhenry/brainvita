@@ -32,7 +32,7 @@ FONT_UI_MONO = pygame.font.Font(PATH_FONTS / "synchronizer_nbp.ttf", 24)
 
 # Sprites
 SCALE_FACTOR = 3
-SPRT_MARBLE = pygame.image.load(PATH_SPRITES / "marble.png")  # 18x18
+SPRT_MARBLE = pygame.image.load(PATH_SPRITES / "marble1.png")  # 18x18
 SPRT_MARBLE = pygame.transform.scale(
     SPRT_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
 )  # Scaling factor 3
