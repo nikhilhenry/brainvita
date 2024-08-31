@@ -20,7 +20,7 @@ class ImageButton(pygame.sprite.Sprite):
 
         self.x, self.y = location
         self.default_surface = default_surface
-        
+
         if hovered_surface is None:
             self.hovered_surface = self.default_surface
         else:
@@ -30,7 +30,7 @@ class ImageButton(pygame.sprite.Sprite):
             self.clicked_surface = self.default_surface
         else:
             self.clicked_surface = clicked_surface
-        
+
         self.image = self.default_surface
         self.rect = self.image.get_rect()
         self.rect.x = self.x
@@ -78,10 +78,11 @@ class ImageButton(pygame.sprite.Sprite):
     def click(self) -> None:
         """Set button state to clicked."""
         self.is_clicked = True
-    
+
     def unclick(self) -> None:
         """Set button state to unclicked."""
         self.is_clicked = False
+
 
 class ImageToggleButton(pygame.sprite.Sprite):
     """
@@ -98,12 +99,12 @@ class ImageToggleButton(pygame.sprite.Sprite):
     ):
         super().__init__()
         # button state
-        self.is_toggled = False # this is the same as is_toggled
+        self.is_toggled = False  # this is the same as is_toggled
 
         self.x, self.y = location
         self.default_surface = default_surface
         self.toggled_surface = toggled_surface
-        
+
         if default_hovered_surface is None:
             self.default_hovered_surface = self.default_surface
         else:
@@ -113,7 +114,7 @@ class ImageToggleButton(pygame.sprite.Sprite):
             self.toggled_hovered_surface = self.toggled_surface
         else:
             self.toggled_hovered_surface = toggled_hovered_surface
-        
+
         self.image = self.default_surface
         self.rect = self.image.get_rect()
         self.rect.x = self.x

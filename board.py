@@ -330,7 +330,9 @@ if __name__ == "__main__":
             old_board = board
             board = board.make_move(move)
 
-    print(f"Time taken: {round(time.time() - st,3)}s | Steps taken to solve: {len(sequence)}")
+    print(
+        f"Time taken: {round(time.time() - st,3)}s | Steps taken to solve: {len(sequence)}"
+    )
     pickle.dump([str(board) for board in sequence], open(args.savefile, "wb"))
 
     print(f"(Reverse) Sequence of moves saved to {args.savefile}")

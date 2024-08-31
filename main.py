@@ -1,34 +1,22 @@
 import asyncio
 import enum
-from typing import Any, TextIO
 import pygame
 import constants as c
-from board import Board, Move, NodeState
-from collections import namedtuple
+from board import Board, Move
 from music_controller import MusicController
 import sys
 import platform
-from search import Node, stepped_dhokla_first_search, stepped_best_first_search, stepped_bread_first_search
+from search import (
+    Node,
+    stepped_dhokla_first_search,
+    stepped_best_first_search,
+    stepped_bread_first_search,
+)
 from utils import Position
 import argparse
 
 import widgets
-
-Coordinate = namedtuple("Coordinate", ["x", "y"])
-
-# Mapping of board position to coordinates
-POS2COORD = {}
-for i in range(7):
-    for j in range(7):
-        # 198x198 board, 18x18 marbles, 36x36 is the padding before grid starts, no padding in between marbles
-        POS2COORD[Position(i, j)] = Coordinate(
-            ((c.D_WIDTH // 2) - (198 * c.SCALE_FACTOR // 2))
-            + (36 * c.SCALE_FACTOR)
-            + (j * 18 * c.SCALE_FACTOR),
-            ((c.D_HEIGHT // 2) - (198 * c.SCALE_FACTOR // 2))
-            + (36 * c.SCALE_FACTOR)
-            + (i * 18 * c.SCALE_FACTOR),
-        )
+from sprites import Marble
 
 # initialize pygame
 pygame.init()
@@ -39,35 +27,6 @@ class GameState(enum.Enum):
     ANIMATING = 1
     LOST = 2
     WIN = 3
-
-
-class Marble(pygame.sprite.Sprite):
-    def __init__(self, pos: Position, state: NodeState):
-        super().__init__()
-
-        self.image = c.SPRT_MARBLE
-        self.rect = self.image.get_rect()
-
-        self.pos = pos
-        self.state = state
-
-        # initial rect location
-        if self.state == NodeState.FILLED:
-            self.rect.x = POS2COORD[self.pos].x
-            self.rect.y = POS2COORD[self.pos].y
-        else:
-            self.rect.x = -100
-            self.rect.y = -100
-
-    def update(self, new_pos: Position, state: NodeState) -> None:
-        self.state = state
-        if self.state == NodeState.FILLED:
-            self.pos = new_pos
-            self.rect.x = POS2COORD[self.pos].x
-            self.rect.y = POS2COORD[self.pos].y
-        else:
-            self.rect.x = -100
-            self.rect.y = -100
 
 
 class Brainvita:
@@ -181,14 +140,14 @@ class Brainvita:
                     # get which possible move is clicked (if any)
                     for move in self.possible_positions:
                         if (
-                            POS2COORD[move].x
+                            c.POS2COORD[move].x
                             < event.pos[0]
-                            < POS2COORD[move].x + 18 * c.SCALE_FACTOR
+                            < c.POS2COORD[move].x + 18 * c.SCALE_FACTOR
                         ):
                             if (
-                                POS2COORD[move].y
+                                c.POS2COORD[move].y
                                 < event.pos[1]
-                                < POS2COORD[move].y + 18 * c.SCALE_FACTOR
+                                < c.POS2COORD[move].y + 18 * c.SCALE_FACTOR
                             ):
                                 # move the marble
                                 new_board = self.board.make_move(
@@ -287,7 +246,7 @@ class Brainvita:
                 self.update_marbles_based_on_board()
 
             elif self.algorithm == "bfs":
-               
+
                 game_over, self.board, self.autovars_open, self.autovars_closed = (
                     stepped_bread_first_search(
                         Node(self.board), self.autovars_open, self.autovars_closed

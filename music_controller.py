@@ -34,4 +34,3 @@ class MusicController:
         self.is_playing = True
         self.bg_channel.set_volume(self.bg_volume)
         self.fx_channel.set_volume(self.fx_volume)
-

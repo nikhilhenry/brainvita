@@ -33,14 +33,14 @@ def bread_first_search(start_node: Node):
                 open.append(Node(child, parent))
 
 
-def stepped_bread_first_search(node: Node, open: Deque[Node] | None, closed: set): 
+def stepped_bread_first_search(node: Node, open: Deque[Node] | None, closed: set):
 
     if open is None:
         open = deque()
         open.append(node)
-    
+
     parent = open.popleft()
-    
+
     if parent.board.goal_test():
         return True, parent.board, open, closed
     else:
@@ -52,6 +52,5 @@ def stepped_bread_first_search(node: Node, open: Deque[Node] | None, closed: set
 
         for child in children:
             open.append(Node(child, parent))
-        
-        return False, parent.board, open, closed
 
+        return False, parent.board, open, closed

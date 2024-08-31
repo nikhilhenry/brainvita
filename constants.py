@@ -1,8 +1,9 @@
+from collections import namedtuple
 from pathlib import Path
 import pygame
 
-pygame.mixer.pre_init(44100, -16, 2, 512)
-pygame.mixer.init()
+from utils import Position
+
 pygame.init()
 
 # Paths
@@ -73,5 +74,23 @@ SND_MOVE = pygame.mixer.Sound(str(PATH_AUDIO / "marble1.ogg"))
 SND_SELECT = pygame.mixer.Sound(str(PATH_AUDIO / "cut_select.ogg"))
 
 # Set Display Properties
-pygame.display.set_caption('Brainvita')
+pygame.display.set_caption("Brainvita")
 pygame.display.set_icon(SPRT_MARBLE)
+
+# Game Constants
+
+# Mapping of board position to coordinates
+Coordinate = namedtuple("Coordinate", ["x", "y"])
+
+POS2COORD = {}
+for i in range(7):
+    for j in range(7):
+        # 198x198 board, 18x18 marbles, 36x36 is the padding before grid starts, no padding in between marbles
+        POS2COORD[Position(i, j)] = Coordinate(
+            ((D_WIDTH // 2) - (198 * SCALE_FACTOR // 2))
+            + (36 * SCALE_FACTOR)
+            + (j * 18 * SCALE_FACTOR),
+            ((D_HEIGHT // 2) - (198 * SCALE_FACTOR // 2))
+            + (36 * SCALE_FACTOR)
+            + (i * 18 * SCALE_FACTOR),
+        )
