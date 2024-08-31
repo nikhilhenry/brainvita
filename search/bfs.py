@@ -31,3 +31,26 @@ def bread_first_search(start_node: Node):
             children = [child for child in children if child not in closed]
             for child in children:
                 open.append(Node(child, parent))
+
+
+def stepped_bread_first_search(node: Node, open: Deque[Node] | None, closed: set):
+
+    if open is None:
+        open = deque()
+        open.append(node)
+
+    parent = open.popleft()
+
+    if parent.board.goal_test():
+        return True, parent, open, closed
+    else:
+
+        closed.add(parent.board)
+        children: list = parent.board.move_gen()
+
+        children = [child for child in children if child not in closed]
+
+        for child in children:
+            open.append(Node(child, parent))
+
+        return False, parent, open, closed

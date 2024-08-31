@@ -1,62 +1,36 @@
 import asyncio
-from typing import Any, TextIO
+import enum
+import time
 import pygame
 import constants as c
 from board import Board, Move, NodeState
-from collections import namedtuple
 from music_controller import MusicController
 import sys
 import platform
-from utils import Position
+from search import (
+    Node,
+    stepped_dhokla_first_search,
+    stepped_best_first_search,
+    stepped_bread_first_search,
+)
 import argparse
 
-Coordinate = namedtuple("Coordinate", ["x", "y"])
-
-# Mapping of board position to coordinates
-POS2COORD = {}
-for i in range(7):
-    for j in range(7):
-        # 198x198 board, 18x18 marbles, 36x36 is the padding before grid starts, no padding in between marbles
-        POS2COORD[Position(i, j)] = Coordinate(
-            ((c.D_WIDTH // 2) - (198 * c.SCALE_FACTOR // 2))
-            + (36 * c.SCALE_FACTOR)
-            + (j * 18 * c.SCALE_FACTOR),
-            ((c.D_HEIGHT // 2) - (198 * c.SCALE_FACTOR // 2))
-            + (36 * c.SCALE_FACTOR)
-            + (i * 18 * c.SCALE_FACTOR),
-        )
+import widgets
+from sprites import Marble
 
 # initialize pygame
 pygame.init()
 
 
-class Marble(pygame.sprite.Sprite):
-    def __init__(self, pos: Position, state: NodeState) -> None:
-        super().__init__()
+class GameState(enum.Enum):
+    """
+    An enum to represent the game state, for animation and showing the game over screen.
+    """
 
-        self.image = c.SPRT_MARBLE
-        self.rect = self.image.get_rect()
-
-        self.pos = pos
-        self.state = state
-
-        # initial rect location
-        if self.state == NodeState.FILLED:
-            self.rect.x = POS2COORD[self.pos].x
-            self.rect.y = POS2COORD[self.pos].y
-        else:
-            self.rect.x = -100
-            self.rect.y = -100
-
-    def update(self, new_pos: Position, state: NodeState) -> None:
-        self.state = state
-        if self.state == NodeState.FILLED:
-            self.pos = new_pos
-            self.rect.x = POS2COORD[self.pos].x
-            self.rect.y = POS2COORD[self.pos].y
-        else:
-            self.rect.x = -100
-            self.rect.y = -100
+    MANUAL = 0  # default game state is manual
+    ANIMATING = 1
+    LOST = 2
+    WIN = 3
 
 
 class Brainvita:
@@ -74,80 +48,230 @@ class Brainvita:
         else:
             self.board = Board()
 
+        self.game_state = GameState.MANUAL
+        self.algorithm = None
+        self.autovars_open = None
+        self.autovars_closed = set()
+        self.autostats = {
+            "start_time": 0,
+            "end_time": 0,
+            "steps": 0,
+        }
         self.move_count = 0
         self.is_game_over = False
         self.selected_marble = None
         self.possible_positions = []
+        self.undo_stack = []
 
         # musician
         self.musician = musician
         self.musician.start()
 
-        # Create sprite lists
-        self.marble_list = pygame.sprite.Group()
-
         # Create the marble sprites
+        self.marble_list = pygame.sprite.Group()
         for pos in self.board._board:
             marble = Marble(pos, state=self.board._board[pos])
             self.marble_list.add(marble)
 
+        # Create the buttons
+        self.dfs_button = widgets.ImageButton(
+            (30, 200),
+            c.SPRT_DFS_BTN,
+            hovered_surface=c.SPRT_DFS_BTN_CLICKED,
+            clicked_surface=c.SPRT_DFS_BTN_CLICKED,
+        )
+        self.bfs_button = widgets.ImageButton(
+            (30, 200 + 60),
+            c.SPRT_BFS_BTN,
+            hovered_surface=c.SPRT_BFS_BTN_CLICKED,
+            clicked_surface=c.SPRT_BFS_BTN_CLICKED,
+        )
+        self.bestfs_button = widgets.ImageButton(
+            (30, 260 + 60),
+            c.SPRT_BESTFS_BTN,
+            hovered_surface=c.SPRT_BESTFS_BTN_CLICKED,
+            clicked_surface=c.SPRT_BESTFS_BTN_CLICKED,
+        )
+
+        self.reset_button = widgets.ImageButton(
+            (30, 400),
+            c.SPRT_RESTART_BTN,
+            hovered_surface=c.SPRT_RESTART_BTN_CLICKED,
+            clicked_surface=c.SPRT_RESTART_BTN_CLICKED,
+        )
+        self.mute_button = widgets.ImageToggleButton(
+            (30 + 64 + 5, 400),
+            c.SPRT_MUSIC_ON_BTN,
+            c.SPRT_MUSIC_OFF_BTN,
+        )
+        self.undo_button = widgets.ImageButton(
+            (99 + 64 + 5, 400),
+            c.SPRT_UNDO_BTN,
+            hovered_surface=c.SPRT_UNDO_BTN_CLICKED,
+            clicked_surface=c.SPRT_UNDO_BTN_CLICKED,
+        )
+
+        self.button_list = pygame.sprite.Group(
+            self.reset_button,
+            self.dfs_button,
+            self.bfs_button,
+            self.bestfs_button,
+            self.mute_button,
+            self.undo_button,
+        )
+
+    def reset_base(self):
+        self.board = Board()
+        self.move_count = 0
+        self.game_state = GameState.MANUAL
+        self.algorithm = None
+        self.autovars_closed = set()
+        self.autovars_open = None
+        self.autostats = {
+            "start_time": 0,
+            "end_time": 0,
+            "steps": 0,
+        }
+
+        self.update_marble_state()
+        self.selected_marble = None
+        self.possible_positions = []
+        self.undo_stack = []
+
+    def update_marble_state(self):
+        """
+        Update the marble states based on the board state
+        """
+        for marble in self.marble_list:
+            marble.update(marble.pos, self.board[marble.pos])
+
     def process_events(self) -> None:
         """
-        Process all events
+        Process all events. This includes mouse clicks, button clicks, etc.
+        This shouldn't contain logic, but it should call the appropriate methods.
+        It should update the game state based on the events.
         """
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_game_over = True
+            if event.type == pygame.MOUSEMOTION:
+                # update button hover state
+                for button in self.button_list:
+                    button.update()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # get which marble is hovered and clicked (if any)
-                for marble in self.marble_list:
-                    if marble.rect.collidepoint(event.pos):
-                        # mark marble as selected, prompting move generation
-                        self.selected_marble = marble
-                        self.musician.play_select_sound()
+                if self.game_state == GameState.MANUAL:
+                    # get which marble is hovered and clicked (if any)
+                    for marble in self.marble_list:
+                        if marble.rect.collidepoint(event.pos):
+                            # mark marble as selected, prompting move generation for that marble
+                            self.selected_marble = marble
+                            self.musician.play_select_sound()
 
-                # get which possible move is clicked (if any)
-                for move in self.possible_positions:
-                    if (
-                        POS2COORD[move].x
-                        < event.pos[0]
-                        < POS2COORD[move].x + 18 * c.SCALE_FACTOR
-                    ):
+                    # get which possible move is clicked (if any)
+                    for move in self.possible_positions:
                         if (
-                            POS2COORD[move].y
-                            < event.pos[1]
-                            < POS2COORD[move].y + 18 * c.SCALE_FACTOR
+                            c.POS2COORD[move].x
+                            < event.pos[0]
+                            < c.POS2COORD[move].x
+                            + 18 * c.SCALE_FACTOR  # 18 is the width of the marble
                         ):
-                            # move the marble
-                            new_board = self.board.make_move(
-                                Move(self.selected_marble.pos, move)
-                            )
-                            if new_board:
-                                self.musician.play_move_sound()
-                                self.board = new_board
-                                self.move_count += 1
-                                self.update_marbles_based_on_board()
-                                self.selected_marble = None
-                                self.possible_positions = []
+                            if (
+                                c.POS2COORD[move].y
+                                < event.pos[1]
+                                < c.POS2COORD[move].y
+                                + 18 * c.SCALE_FACTOR  # 18 is the height of the marble
+                            ):
+                                # move the marble
+                                new_board = self.board.make_move(
+                                    Move(self.selected_marble.pos, move)
+                                )
+                                if new_board:
+                                    self.undo_stack.append(self.board)
+                                    self.musician.play_move_sound()
+                                    self.board = new_board
+                                    self.move_count += 1
+                                    self.update_marble_state()
+                                    self.selected_marble = None
+                                    self.possible_positions = []
+                                    if self.board.goal_test():
+                                        self.game_state = GameState.WIN
+                                    elif not self.board.solvable():
+                                        self.game_state = GameState.LOST
 
-    def update_marbles_based_on_board(self):
-        """
-        Update the marbles based on the board state
-        """
-        for marble in self.marble_list:
-            marble.update(marble.pos, self.board[marble.pos])
+                # get which button is clicked (if any)
+                button: widgets.ImageButton | widgets.ImageToggleButton
+                for button in self.button_list:
+                    if button.hovered:
+                        button.click()
 
-    def main_loop(self):
+    def main_logic(self):
         """
-        Main game loop for Brainvita.
+        Main game logic loop for Brainvita.
         """
 
-        if self.selected_marble:
-            move_locations = self.board.get_possible_move_locations(
-                self.selected_marble.pos
+        # Button logic
+        if self.reset_button.is_clicked:
+            self.reset_base()
+            self.reset_button.unclick()
+        elif self.dfs_button.is_clicked:
+            if self.game_state != GameState.ANIMATING:
+                self.game_state = GameState.ANIMATING
+                self.algorithm = "dfs"
+                self.autostats["start_time"] = time.time()
+            self.dfs_button.unclick()
+        elif self.bfs_button.is_clicked:
+            if self.game_state != GameState.ANIMATING:
+                self.game_state = GameState.ANIMATING
+                self.algorithm = "bfs"
+                self.autostats["start_time"] = time.time()
+            self.bfs_button.unclick()
+        elif self.bestfs_button.is_clicked:
+            if self.game_state != GameState.ANIMATING:
+                self.game_state = GameState.ANIMATING
+                self.algorithm = "bestfs"
+                self.autostats["start_time"] = time.time()
+            self.bestfs_button.unclick()
+        elif self.undo_button.is_clicked:
+            if self.game_state == GameState.MANUAL and len(self.undo_stack) > 0:
+                self.board = self.undo_stack.pop()
+                self.move_count += 1  # undoing a move is also a move
+                self.update_marble_state()
+            self.undo_button.unclick()
+
+        if self.mute_button.is_toggled:
+            self.musician.mute()
+        else:
+            if not self.musician.is_playing:
+                self.musician.unmute()
+
+        # Game logic
+        if self.game_state == GameState.MANUAL:
+            if self.selected_marble:
+                move_locations = self.board.get_possible_move_locations(
+                    self.selected_marble.pos
+                )
+                self.possible_positions = move_locations
+        elif self.game_state == GameState.ANIMATING:
+            if self.algorithm == "dfs":
+                function = stepped_dhokla_first_search
+            elif self.algorithm == "bfs":
+                function = stepped_bread_first_search
+            elif self.algorithm == "bestfs":
+                function = stepped_best_first_search
+
+            game_over, board_node, self.autovars_open, self.autovars_closed = function(
+                Node(self.board), self.autovars_open, self.autovars_closed
             )
-            self.possible_positions = move_locations
+            self.board = board_node.board
+            self.autostats["steps"] = len(board_node.back_track())
+            self.autostats["end_time"] = time.time()
+            self.update_marble_state()
+            self.move_count += 1
+
+            if game_over:
+                self.game_state = GameState.WIN
 
     def display(self):
         """
@@ -167,28 +291,71 @@ class Brainvita:
 
         rendered_text = c.FONT_MAIN.render("Brainvita", False, (0, 0, 0))
         c.ROOT_DISPLAY.blit(rendered_text, (20, 50))
-        rendered_text = c.FONT_UI.render(
-            f"Moves:        {self.move_count}", False, (0, 0, 0)
+        rendered_text = c.FONT_UI_MONO.render(
+            f"{'Moves:':<10}{self.move_count:>6}", False, (0, 0, 0)
         )
-        c.ROOT_DISPLAY.blit(rendered_text, (20, 120))
-        rendered_text = c.FONT_UI.render(
-            f"Marbles:    {self.board.num_marbles}", False, (0, 0, 0)
+        c.ROOT_DISPLAY.blit(rendered_text, (30, 120))
+
+        rendered_text = c.FONT_UI_MONO.render(
+            f"{'Marbles:':<10}{self.board.num_marbles:>6}", False, (0, 0, 0)
         )
-        c.ROOT_DISPLAY.blit(rendered_text, (20, 150))
+        c.ROOT_DISPLAY.blit(rendered_text, (30, 150))
 
         self.marble_list.draw(c.ROOT_DISPLAY)
 
-        if self.selected_marble:
-            c.ROOT_DISPLAY.blit(
-                c.SPRT_SELECTED_MARBLE,
-                (self.selected_marble.rect.x, self.selected_marble.rect.y),
-            )
-        if self.possible_positions:
-            for move in self.possible_positions:
+        if self.game_state == GameState.MANUAL:
+
+            if self.selected_marble:
                 c.ROOT_DISPLAY.blit(
-                    c.SPRT_POSSIBLE_MOVE,
-                    (POS2COORD[move].x, POS2COORD[move].y),
+                    c.SPRT_SELECTED_MARBLE,
+                    (self.selected_marble.rect.x, self.selected_marble.rect.y),
                 )
+            if self.possible_positions:
+                for move in self.possible_positions:
+                    c.ROOT_DISPLAY.blit(
+                        c.SPRT_POSSIBLE_MOVE,
+                        (c.POS2COORD[move].x, c.POS2COORD[move].y),
+                    )
+        elif self.game_state == GameState.ANIMATING:
+
+            rendered_text = c.FONT_MAIN.render(
+                f"{f'{self.algorithm} ON':>30}", False, (26, 150, 28)
+            )
+            c.ROOT_DISPLAY.blit(rendered_text, (350, 50))
+
+            # render algorithm statistics
+
+        elif self.game_state == GameState.WIN:
+
+            rendered_text = c.FONT_MAIN.render("WIN!", False, (26, 150, 28))
+            c.ROOT_DISPLAY.blit(rendered_text, (990, 50))
+
+            marble: Marble
+            for marble in self.marble_list:
+                if self.board[marble.pos] != NodeState.EMPTY:
+                    c.ROOT_DISPLAY.blit(
+                        c.SPRT_MARBLE_WIN,
+                        (marble.rect.x, marble.rect.y),
+                    )
+
+            rendered_text = c.FONT_UI_MONO.render(
+                f"{'Time:':<8}{round(self.autostats['end_time']-self.autostats['start_time'], 2):>6}s",
+                False,
+                (0, 0, 0),
+            )
+            c.ROOT_DISPLAY.blit(rendered_text, (1000, 120))
+            rendered_text = c.FONT_UI_MONO.render(
+                f"{'PathLen:':<8}{self.autostats['steps']:>7}", False, (0, 0, 0)
+            )
+            c.ROOT_DISPLAY.blit(rendered_text, (1000, 150))
+
+        elif self.game_state == GameState.LOST:
+
+            rendered_text = c.FONT_MAIN.render("LOST!", False, (184, 33, 33))
+            c.ROOT_DISPLAY.blit(rendered_text, (990, 50))
+
+        self.button_list.draw(c.ROOT_DISPLAY)
+
         pygame.display.flip()
 
 
@@ -207,7 +374,7 @@ async def main(starting_state: str | None = None):
         # Process events (keystrokes, mouse clicks, etc)
         game.process_events()
         # Update object positions, run game logic
-        game.main_loop()
+        game.main_logic()
         # Draw the current frame
         game.display()
         c.GAME_CLOCK.tick(c.TICK_RATE)

@@ -34,3 +34,26 @@ def best_first_search(start_node: Node):
             #     print("=====")
 
     return None
+
+
+def stepped_best_first_search(node: Node, open: list[Node] | None, closed: set):
+
+    if open is None:
+        open = []
+        heapq.heappush(open, node)
+
+    parent = heapq.heappop(open)
+
+    if parent.board.goal_test():
+        return True, parent, open, closed
+    else:
+
+        closed.add(parent.board)
+        children: list = parent.board.move_gen()
+
+        children = [child for child in children if child not in closed]
+
+        for child in children:
+            heapq.heappush(open, Node(child, parent))
+
+        return False, parent, open, closed
