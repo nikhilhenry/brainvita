@@ -48,12 +48,23 @@ SPRT_SELECTED_MARBLE = pygame.transform.scale(
 )  # scaling factor 3
 
 # Buttons
-SPRT_BTN = pygame.image.load(PATH_SPRITES / "temp_buttonNormal.png")
-SPRT_BTN = pygame.transform.scale(SPRT_BTN, (100, 30))
-SPRT_BTN_HOVERED = pygame.image.load(PATH_SPRITES / "temp_buttonHover.png")
-SPRT_BTN_HOVERED = pygame.transform.scale(SPRT_BTN_HOVERED, (100, 30))
-SPRT_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "temp_buttonPressed.png")
-SPRT_BTN_CLICKED = pygame.transform.scale(SPRT_BTN_CLICKED, (100, 30))
+SPRT_BFS_BTN = pygame.image.load(PATH_SPRITES / "bfs_button1.png")
+SPRT_BFS_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "bfs_button2.png")
+
+SPRT_DFS_BTN = pygame.image.load(PATH_SPRITES / "dfs_button1.png")
+SPRT_DFS_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "dfs_button2.png")
+
+SPRT_BESTFS_BTN = pygame.image.load(PATH_SPRITES / "bst_button1.png")
+SPRT_BESTFS_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "bst_button2.png")
+
+SPRT_MUSIC_OFF_BTN = pygame.image.load(PATH_SPRITES / "music_off.png")
+SPRT_MUSIC_ON_BTN = pygame.image.load(PATH_SPRITES / "music_on.png")
+
+SPRT_RESTART_BTN = pygame.image.load(PATH_SPRITES / "reset1.png")
+SPRT_RESTART_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "reset2.png")
+
+SPRT_UNDO_BTN = pygame.image.load(PATH_SPRITES / "undo1.png")
+SPRT_UNDO_BTN_CLICKED = pygame.image.load(PATH_SPRITES / "undo2.png")
 
 # Sounds
 SND_BG = pygame.mixer.Sound(str(PATH_AUDIO / "soundtrack.ogg"))

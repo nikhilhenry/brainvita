@@ -14,6 +14,8 @@ class MusicController:
         self.fx_channel = mixer.Channel(1)
         self.fx_channel.set_volume(self.fx_volume)
 
+        self.is_playing = True
+
     def start(self):
         self.bg_channel.play(c.SND_BG, loops=-1)
 
@@ -24,11 +26,12 @@ class MusicController:
         self.fx_channel.play(c.SND_SELECT)
 
     def mute(self):
+        self.is_playing = False
         self.bg_channel.set_volume(0)
         self.fx_channel.set_volume(0)
 
     def unmute(self):
-
+        self.is_playing = True
         self.bg_channel.set_volume(self.bg_volume)
         self.fx_channel.set_volume(self.fx_volume)
 
