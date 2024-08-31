@@ -36,6 +36,10 @@ SPRT_MARBLE = pygame.image.load(PATH_SPRITES / "marble1.png")  # 18x18
 SPRT_MARBLE = pygame.transform.scale(
     SPRT_MARBLE, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
 )  # Scaling factor 3
+SPRT_MARBLE_WIN = pygame.image.load(PATH_SPRITES / "marble2.png")  # 18x18
+SPRT_MARBLE_WIN = pygame.transform.scale(
+    SPRT_MARBLE_WIN, (18 * SCALE_FACTOR, 18 * SCALE_FACTOR)
+)  # Scaling factor 3
 SPRT_BOARD = pygame.image.load(PATH_SPRITES / "board.png")  # 198x198
 SPRT_BOARD = pygame.transform.scale(
     SPRT_BOARD, (198 * SCALE_FACTOR, 198 * SCALE_FACTOR)

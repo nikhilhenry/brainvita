@@ -2,7 +2,7 @@ import asyncio
 import enum
 import pygame
 import constants as c
-from board import Board, Move
+from board import Board, Move, NodeState
 from music_controller import MusicController
 import sys
 import platform
@@ -309,6 +309,14 @@ class Brainvita:
         elif self.game_state == GameState.WIN:
 
             rendered_text = c.FONT_MAIN.render(f"{'WIN!':>30}", False, (26, 150, 28))
+
+            marble: Marble
+            for marble in self.marble_list:
+                if self.board[marble.pos] != NodeState.EMPTY:
+                    c.ROOT_DISPLAY.blit(
+                        c.SPRT_MARBLE_WIN,
+                        (marble.rect.x, marble.rect.y),
+                    )
             c.ROOT_DISPLAY.blit(rendered_text, (400, 50))
 
         elif self.game_state == GameState.LOST:
