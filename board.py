@@ -3,11 +3,10 @@ Contains code to describe the current state of the game.
 """
 
 from __future__ import annotations
-
 from enum import Enum
 from collections import defaultdict
 import pickle
-from typing import Dict
+from typing import Dict,Self
 from search import dhokla_first_search, best_first_search, bread_first_search
 from utils import Position
 from search import Node
@@ -16,6 +15,22 @@ import time
 
 import argparse
 
+def construct_matrix_from_hashmap(board_hashmap):
+    n=7
+    matrix = [[board_hashmap[Position(i,j)] for j in range(n)] for i in range(n)]
+    return matrix
+
+
+def rotate90(mat_mat):
+    n= len(mat_mat)
+    matrix = [[mat_mat[j][i] for j in range(n)] for i in range(n)]
+    # Reverse each row
+    for i in range(n):
+        matrix[i].reverse()
+    return matrix
+
+def str_matrix(matrix:list[list[NodeState]]):
+    return "".join(["".join([str(s) for s in row]) for row in matrix])
 
 class Move:
     """
@@ -107,7 +122,14 @@ class Board:
 
     def __hash__(self) -> int:
         # to allow for hashing of the board state, we use the string representation
-        return hash(str(self))
+        # create a list of all rotated states
+        top = construct_matrix_from_hashmap(self._board)
+        hashed = hash(str_matrix(top))
+        for _ in range(3):
+            top = rotate90(top)
+            hashed+=hash(str_matrix(top))
+
+        return hashed
 
     def __str__(self) -> str:
         s = ""
@@ -128,22 +150,34 @@ class Board:
     def __setitem__(self, pos: Position, value: NodeState):
         self._board[pos] = value
 
-    def __le__(self, other):
-        return self.num_marbles <= other.num_marbles
+    def __le__(self, other:Self):
+        #return self.num_marbles <= other.num_marbles
+        return self._distance_from_center()  <= other._distance_from_center()
 
     def __eq__(self, other):
         return hash(self) == hash(other)
 
+    def _total_possible_moves(self):
+        marble_positions = [pos for pos, state in self._board.items() if state == NodeState.FILLED]
+        total = 0
+        for marble in marble_positions:
+            total+=len(self.get_possible_move_locations(marble))
+        return total
+
+    def _distance_from_center(self):
+        marble_positions = [pos for pos, state in self._board.items() if state == NodeState.FILLED]
+        manhattan = 0
+        for position in marble_positions:
+            diff = self._CENTER -  position
+            manhattan += abs(diff.row) + abs(diff.column)
+        return manhattan
+
     def solvable(self) -> bool:
         """
-        Returns True if current arrangment of marbles allows for some marbles to be eliminated, else False.
+        Returns True if moves are still possible, else False.
         """
         if self.num_marbles == 1:
             # solved!
-            return True
-
-        if self.num_marbles > 4:
-            # some moves can still be made in this state
             return True
 
         marble_positions = [
@@ -151,15 +185,8 @@ class Board:
         ]
         # compute the distance between this marble and every other marble
         for marble in marble_positions:
-            for other in marble_positions:
-                if other == marble:
-                    continue
-                distance = marble - other
-                # if either difference in column or row is odd we can eliminate a marble
-                if distance.row == 0 and distance.column % 2 == 1:
-                    return True
-                if distance.column == 0 and distance.row % 2 == 1:
-                    return True
+            if len(self.get_possible_move_locations(marble)) != 0:
+                return True
         return False
 
     def make_move(self, move: Move) -> Board | None:
@@ -219,21 +246,23 @@ class Board:
 
         return new_board
 
-    def get_possible_move_locations(self, pos: Position) -> list[Position]:
+    def get_possible_move_locations(self, src: Position) -> list[Position]:
         """
         Returns a list of possible move-to positions from the given position
         """
-        positions = []
+        moves = []
         for i in range(-2, 3, 2):
             if i == 0:  # to avoid self moves
                 continue
 
-            if self[pos + Position(i, 0)] == NodeState.EMPTY:
-                positions.append(pos + Position(i, 0))
-            if self[pos + Position(0, i)] == NodeState.EMPTY:
-                positions.append(pos + Position(0, i))
+            if self[src + Position(i, 0)] == NodeState.EMPTY:
+                moves.append(Move(src,src + Position(i, 0)))
+            if self[src + Position(0, i)] == NodeState.EMPTY:
+                moves.append(Move(src,src + Position(0, i)))
 
-        return positions
+        # filter the positions based on if the in-between has a marble
+
+        return [move.dst for move in moves if self[move.get_in_between_pos()] == NodeState.FILLED]
 
     def move_gen(self) -> list[Board]:
         """
@@ -265,7 +294,7 @@ class Board:
         """
         Returns True if the game is over
         """
-        return self.num_marbles == 1
+        return self.num_marbles == 1 and self[Position(3,3)] == NodeState.FILLED
 
 
 """
