@@ -7,7 +7,8 @@ def dhokla_first_search(start_node: Node):
     prev_marble_count = start_node.board.num_marbles
 
     open: list[Node] = [start_node]
-    closed: list = []
+    closed: set = set()
+
     while open != []:
         parent = open.pop()
         if parent.board.goal_test():
@@ -17,7 +18,7 @@ def dhokla_first_search(start_node: Node):
                 prev_marble_count = parent.board.num_marbles
                 print(f"Marbles left: {parent.board.num_marbles}")
 
-            closed.append(parent.board)
+            closed.add(parent.board)
             children: list = parent.board.move_gen()
 
             children = [child for child in children if child not in closed]
@@ -43,7 +44,7 @@ def stepped_dhokla_first_search(node: Node, open: list[Node] | None, closed: set
         children: list = parent.board.move_gen()
 
         children = [child for child in children if child not in closed]
-
+        
         for child in children:
             open.append(Node(child, parent))
 
