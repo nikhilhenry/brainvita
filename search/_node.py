@@ -11,7 +11,7 @@ class Node:
         self.parent = parent
 
     def __lt__(self, other: Self):
-        return self.board.num_marbles < other.board.num_marbles
+        return self.board < other.board
 
     def back_track(self, sequence=[]):
         """
