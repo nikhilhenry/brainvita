@@ -15,6 +15,7 @@ import time
 
 import argparse
 
+_POSITIONS = [Position(-1,0),Position(1,0),Position(0,1),Position(0,-1)]
 
 def construct_matrix_from_hashmap(board_hashmap):
     n = 7
@@ -78,6 +79,7 @@ class Board:
     def __init__(self):
 
         self._SIZE = 7
+        self._CENTER = Position(3,3)
 
         # state
         self.num_marbles = 32
@@ -154,10 +156,9 @@ class Board:
         self._board[pos] = value
 
     def __lt__(self, other: Self):
-        print("called")
         # return self.num_marbles < other.num_marbles
         # heuristic: count the number of possible 
-        return self._distance_from_center() < other._distance_from_center()
+        return self._num_isolated() < other._num_isolated()
 
     def __eq__(self, other):
         return hash(self) == hash(other)
@@ -180,7 +181,25 @@ class Board:
             diff = self._CENTER - position
             manhattan += abs(diff.row) + abs(diff.column)
         return manhattan
-
+    
+    def _num_isolated(self):
+        """
+        counts the number of marbles which have no adjacent marbles
+        """
+        marble_positions = [
+            pos for pos, state in self._board.items() if state == NodeState.FILLED
+        ]
+        count = 0
+        for position in marble_positions:
+            found = 0
+            for neig in _POSITIONS:
+                if self._board[position + neig] == NodeState.FILLED:
+                    found = 0
+                    break
+                else:
+                    found += 1
+            count += 1 if found else 0
+        return count
     def solvable(self) -> bool:
         """
         Returns True if moves are still possible, else False.
