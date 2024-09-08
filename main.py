@@ -278,7 +278,9 @@ class Brainvita:
                 self.autovars_closed,
             )
             self.board = board_node.board
-            self.autostats["steps"] = len(board_node.back_track())
+            self.autostats["steps"] = (
+                len(board_node.back_track()) - 1
+            )  # dont count the start state
             self.autostats["end_time"] = time.time()
             self.update_marble_state()
             self.move_count += 1

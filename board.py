@@ -207,7 +207,7 @@ class Board:
 
     def _num_corners(self):
         """
-        Potential Heuristic: Mathematics related to # of corners occupied, and # of marbles that can move to corners
+        Final Heuristic: Mathematics related to # of corners occupied, and # of marbles that can move to corners
         """
 
         # corners: cB
