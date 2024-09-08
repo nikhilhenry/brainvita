@@ -38,7 +38,9 @@ def best_first_search(start_node: Node):
     return None
 
 
-def stepped_best_first_search(node: Node, open: list[Node] | None, open_set: set | None, closed: set):
+def stepped_best_first_search(
+    node: Node, open: list[Node] | None, open_set: set | None, closed: set
+):
 
     if open is None and open_set is None:
         open = []
@@ -55,8 +57,10 @@ def stepped_best_first_search(node: Node, open: list[Node] | None, open_set: set
         closed.add(parent.board)
         children: list = parent.board.move_gen()
 
-        children = [child for child in children if child not in closed and child not in open_set]
-        
+        children = [
+            child for child in children if child not in closed and child not in open_set
+        ]
+
         for child in children:
             heapq.heappush(open, Node(child, parent))
             open_set.add(child)

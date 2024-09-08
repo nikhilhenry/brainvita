@@ -265,8 +265,17 @@ class Brainvita:
             elif self.algorithm == "bestfs":
                 function = stepped_best_first_search
 
-            game_over, board_node, self.autovars_open, self.autovars_open_set, self.autovars_closed = function(
-                Node(self.board), self.autovars_open, self.autovars_open_set, self.autovars_closed
+            (
+                game_over,
+                board_node,
+                self.autovars_open,
+                self.autovars_open_set,
+                self.autovars_closed,
+            ) = function(
+                Node(self.board),
+                self.autovars_open,
+                self.autovars_open_set,
+                self.autovars_closed,
             )
             self.board = board_node.board
             self.autostats["steps"] = len(board_node.back_track())

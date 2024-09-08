@@ -204,22 +204,35 @@ class Board:
                     found += 1
             count += 1 if found else 0
         return count
-    
+
     def _num_corners(self):
         """
         Potential Heuristic: Mathematics related to # of corners occupied, and # of marbles that can move to corners
         """
 
         # corners: cB
-        cB_pos = [Position(0, 2), Position(0, 4), Position(2, 0), Position(2, 6), Position(4, 0), Position(4, 6), Position(6, 2), Position(6, 4)]
+        cB_pos = [
+            Position(0, 2),
+            Position(0, 4),
+            Position(2, 0),
+            Position(2, 6),
+            Position(4, 0),
+            Position(4, 6),
+            Position(6, 2),
+            Position(6, 4),
+        ]
         # potential corners: pB
-        pB_pos = [Position(2, 2), Position(2, 4), Position(4, 2), Position(4, 4)] + cB_pos
+        pB_pos = [
+            Position(2, 2),
+            Position(2, 4),
+            Position(4, 2),
+            Position(4, 4),
+        ] + cB_pos
 
         cB_count = [self._board[pos] for pos in cB_pos].count(NodeState.FILLED)
         pB_count = [self._board[pos] for pos in pB_pos].count(NodeState.FILLED)
 
         return cB_count + (pB_count // 4)
-
 
     def solvable(self) -> bool:
         """
