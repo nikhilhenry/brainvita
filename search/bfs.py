@@ -12,9 +12,11 @@ def bread_first_search(start_node: Node):
     # queue to store all the states that haven't been visited
     open = deque()
     open.append(start_node)
+    open_set = set([start_node.board])
     while len(open) != 0:
         # remove from the head
         parent = open.popleft()
+        open_set.discard(parent.board)
         # print(f"Iter: {count}")
         # print(parent.board)
         # count += 1
@@ -28,29 +30,42 @@ def bread_first_search(start_node: Node):
             closed.add(parent.board)
             children = parent.board.move_gen()
             # removing already visited states
-            children = [child for child in children if child not in closed]
+            children = [
+                child
+                for child in children
+                if child not in closed and child not in open_set
+            ]
+
             for child in children:
                 open.append(Node(child, parent))
+                open_set.add(child)
 
 
-def stepped_bread_first_search(node: Node, open: Deque[Node] | None, closed: set):
+def stepped_bread_first_search(
+    node: Node, open: Deque[Node] | None, open_set: set | None, closed: set
+):
 
-    if open is None:
+    if open is None and open_set is None:
+        open_set = set([node.board])
         open = deque()
         open.append(node)
 
     parent = open.popleft()
+    open_set.discard(parent.board)
 
     if parent.board.goal_test():
-        return True, parent, open, closed
+        return True, parent, open, open_set, closed
     else:
 
         closed.add(parent.board)
         children: list = parent.board.move_gen()
 
-        children = [child for child in children if child not in closed]
+        children = [
+            child for child in children if child not in closed and child not in open_set
+        ]
 
         for child in children:
             open.append(Node(child, parent))
+            open_set.add(child)
 
-        return False, parent, open, closed
+        return False, parent, open, open_set, closed

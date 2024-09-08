@@ -51,6 +51,7 @@ class Brainvita:
         self.game_state = GameState.MANUAL
         self.algorithm = None
         self.autovars_open = None
+        self.autovars_open_set = None
         self.autovars_closed = set()
         self.autostats = {
             "start_time": 0,
@@ -127,8 +128,9 @@ class Brainvita:
         self.move_count = 0
         self.game_state = GameState.MANUAL
         self.algorithm = None
-        self.autovars_closed = set()
         self.autovars_open = None
+        self.autovars_open_set = None
+        self.autovars_closed = set()
         self.autostats = {
             "start_time": 0,
             "end_time": 0,
@@ -263,8 +265,8 @@ class Brainvita:
             elif self.algorithm == "bestfs":
                 function = stepped_best_first_search
 
-            game_over, board_node, self.autovars_open, self.autovars_closed = function(
-                Node(self.board), self.autovars_open, self.autovars_closed
+            game_over, board_node, self.autovars_open, self.autovars_open_set, self.autovars_closed = function(
+                Node(self.board), self.autovars_open, self.autovars_open_set, self.autovars_closed
             )
             self.board = board_node.board
             self.autostats["steps"] = len(board_node.back_track())
