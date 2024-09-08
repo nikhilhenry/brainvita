@@ -17,9 +17,7 @@ def bread_first_search(start_node: Node):
         # remove from the head
         parent = open.popleft()
         open_set.discard(parent.board)
-        # print(f"Iter: {count}")
-        # print(parent.board)
-        # count += 1
+        
         if parent.board.goal_test() is True:
             return parent.back_track()
         else:

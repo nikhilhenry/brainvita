@@ -129,8 +129,8 @@ class Board:
     def __hash__(self) -> int:
         # to allow for hashing of the board state, we use the string representation
         # create a list of all rotated states
-        top = construct_matrix_from_hashmap(self._board)
-        hashed = hash(str_matrix(top))
+        top = construct_matrix_from_hashmap(self._board) # create a matrix from the hashmap
+        hashed = hash(str_matrix(top)) # create a string of the matrix and hash it
         for _ in range(3):
             top = rotate90(top)
             hashed += hash(str_matrix(top))
@@ -204,7 +204,13 @@ class Board:
                     found += 1
             count += 1 if found else 0
         return count
-
+    
+    def _num_marbles(self):
+        """
+        Potential Heuristic: Counts the number of marbles
+        """
+        return self.num_marbles
+    
     def _num_corners(self):
         """
         Final Heuristic: Mathematics related to # of corners occupied, and # of marbles that can move to corners
@@ -360,7 +366,7 @@ class Board:
         """
         Returns True if the game is over
         """
-        return self.num_marbles == 1 and self[Position(3, 3)] == NodeState.FILLED
+        return self.num_marbles == 1 and self[self._CENTER] == NodeState.FILLED
 
 
 """
