@@ -3,7 +3,7 @@ import constants as c
 
 
 class MusicController:
-    def __init__(self, bg_volume: int = 0.6, fx_volume: int = 1):
+    def __init__(self, bg_volume: int = 0.3, fx_volume: int = 1):
         mixer.init()
 
         self.bg_volume = bg_volume
